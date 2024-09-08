@@ -1,0 +1,27 @@
+{
+  "name": "tuminol-backend",
+  "version": "1.0.0",
+  "description": "A video sharing social media app inspired by youtube",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/index.js",
+    "prod": "node src/index.js"
+  },
+  "keywords": [
+    "Node.js",
+    "Express.js",
+    "MongoDB"
+  ],
+  "author": "Samonto Karmaker",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.4",
+    "prettier": "^3.3.3"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongoose": "^8.6.1"
+  }
+}

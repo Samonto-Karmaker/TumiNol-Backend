@@ -1,0 +1,76 @@
+# Ignore node_modules and dependency directories
+node_modules/
+bower_components/
+
+# Ignore build output and generated files
+dist/
+build/
+out/
+coverage/
+tmp/
+temp/
+.cache/
+
+# Ignore package manager lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Ignore environment files
+*.env
+.env
+.env.* 
+/src/.env
+
+# Ignore configuration and project-specific files
+*.log
+*.tsbuildinfo
+*.sqlite
+*.db
+
+# Ignore system-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore compiled or minified files
+*.min.js
+*.min.css
+*.map
+
+# Ignore binary files and assets
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.webp
+*.pdf
+*.zip
+*.mp4
+*.mov
+*.mp3
+
+# Ignore public directory (usually contains compiled assets)
+public/
+
+# Ignore Markdown and documentation files (optional)
+*.md
+*.rst
+
+# Ignore specific configuration files for IDEs and text editors
+.idea/
+.vscode/
+*.iml
+
+# Ignore CSS preprocessors and static files (optional)
+*.scss
+*.sass
+*.less
+
+# Ignore frontend-specific files (optional)
+*.css
+*.html
+
+# Ignore Git files
+.git/
