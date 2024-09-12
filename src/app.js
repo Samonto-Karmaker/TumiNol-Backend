@@ -1,5 +1,6 @@
 import express from "express"
 import cors from "cors"
+import setupRouters from "./routers/setupRouters.js"
 
 const app = express()
 
@@ -21,5 +22,7 @@ app.use(
 	})
 )
 app.use(express.static("public"))
+
+setupRouters(app)
 
 export default app
