@@ -1,4 +1,6 @@
 import mongoose from "mongoose"
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
 
 const userSchema = new mongoose.Schema(
 	{
@@ -49,5 +51,45 @@ const userSchema = new mongoose.Schema(
 		timestamps: true,
 	}
 )
+
+// Never use arrow function in mongoose schema because arrow function does not bind "this"
+userSchema.pre("save", async function (next) {
+	if (!this.isModified("password")) return next()
+
+	this.password = await bcrypt.hash(this.password, 10)
+	next()
+})
+
+userSchema.methods.isPasswordMatch = async function (enteredPassword) {
+	return await bcrypt.compare(enteredPassword, this.password)
+}
+
+// Access tokens are short-lived tokens that are used to authenticate the user and
+// are required for every request.
+userSchema.methods.generateAccessToken = function () {
+	return jwt.sign(
+		{
+			_id: this._id,
+		},
+		process.env.ACCESS_TOKEN_SECRET,
+		{
+			expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+		}
+	)
+}
+
+// Refresh tokens are long-lived tokens that are used to generate new access tokens
+// once they expire.
+userSchema.methods.generateRefreshToken = function () {
+	return jwt.sign(
+		{
+			_id: this._id,
+		},
+		process.env.REFRESH_TOKEN_SECRET,
+		{
+			expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+		}
+	)
+}
 
 export const User = mongoose.model("User", userSchema)
