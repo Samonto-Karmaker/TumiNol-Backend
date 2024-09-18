@@ -1,5 +1,6 @@
 import express from "express"
 import cors from "cors"
+import cookieParser from "cookie-parser"
 import setupRouters from "./routers/setupRouters.js"
 
 const app = express()
@@ -22,6 +23,7 @@ app.use(
 	})
 )
 app.use(express.static("public"))
+app.use(cookieParser())
 
 setupRouters(app)
 
