@@ -1,5 +1,7 @@
 import { v2 as cloudinary } from "cloudinary"
 import fs from "fs"
+import path from "path"
+import { TEMP_DIR } from "../constants"
 
 // Configuring cloudinary with the credentials
 cloudinary.config({
@@ -9,6 +11,7 @@ cloudinary.config({
 })
 
 const uploadOnCloudinary = async localFilePath => {
+	localFilePath = path.join(TEMP_DIR, localFilePath)
 	try {
 		if (!localFilePath) return null
 		const response = await cloudinary.uploader.upload(localFilePath, {

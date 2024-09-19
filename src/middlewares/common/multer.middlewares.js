@@ -1,9 +1,10 @@
 import multer from "multer"
 import path from "path"
+import { TEMP_DIR } from "../../constants"
 
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
-		cb(null, "./public/temp")
+		cb(null, TEMP_DIR)
 	},
 	filename: (req, file, cb) => {
 		const ext = path.extname(file.originalname)

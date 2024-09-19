@@ -7,8 +7,10 @@ export const registerValidator = [
 	check("fullName")
 		.isLength({ min: 3 })
 		.withMessage("Full name must be at least 3 characters long")
-		.isAlpha("en-US")
-		.withMessage("Full name must not contain anything other than alphabet")
+		.matches(/^[a-zA-Z\s]+$/)
+		.withMessage(
+			"Full name must not contain anything other than alphabet and spaces"
+		)
 		.trim(),
 	check("userName")
 		.isLength({ min: 3 })
@@ -53,13 +55,16 @@ export const registerValidator = [
 		),
 ]
 
-const registerValidatorMiddleware = async (req, res, next) => {
+const registerValidatorMiddleware = (req, res, next) => {
 	const errors = validationResult(req)
 	const mappedErrors = errors.mapped()
 	if (Object.keys(mappedErrors).length === 0) {
 		return next()
 	}
-	deleteUploadedFiles(req.files)
+	if (req.files) {
+		deleteUploadedFiles(req.files)
+	}
+	res.status(400).json(new ApiError(400, "Invalid data", mappedErrors))
 }
 
 export { registerValidator, registerValidatorMiddleware }
