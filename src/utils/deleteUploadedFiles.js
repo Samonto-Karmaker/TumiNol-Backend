@@ -1,6 +1,6 @@
 import fs from "fs"
 import path from "path"
-import { TEMP_DIR } from "../constants"
+import { TEMP_DIR } from "../constants.js"
 
 const deleteUploadedFiles = files => {
 	if (!files || Object.keys(files).length === 0) {

@@ -1,7 +1,7 @@
 import { v2 as cloudinary } from "cloudinary"
 import fs from "fs"
 import path from "path"
-import { TEMP_DIR } from "../constants"
+import { TEMP_DIR } from "../constants.js"
 
 // Configuring cloudinary with the credentials
 cloudinary.config({

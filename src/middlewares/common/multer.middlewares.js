@@ -1,6 +1,6 @@
 import multer from "multer"
 import path from "path"
-import { TEMP_DIR } from "../../constants"
+import { TEMP_DIR } from "../../constants.js"
 
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {

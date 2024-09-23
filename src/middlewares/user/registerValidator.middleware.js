@@ -3,7 +3,7 @@ import { User } from "../../models/User.js"
 import ApiError from "../../utils/ApiError.js"
 import deleteUploadedFiles from "../../utils/deleteUploadedFiles.js"
 
-export const registerValidator = [
+const registerValidator = [
 	check("fullName")
 		.isLength({ min: 3 })
 		.withMessage("Full name must be at least 3 characters long")
