@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { upload } from "../middlewares/common/multer.middlewares.js"
+import { upload } from "../middlewares/common/multer.middleware.js"
 import { registerUser } from "../controllers/user.controllers.js"
 import {
 	registerValidator,

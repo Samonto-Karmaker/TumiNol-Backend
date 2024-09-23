@@ -7,7 +7,7 @@ const deleteUploadedFiles = files => {
 		return
 	}
 	Object.keys(files).forEach(file => {
-		const filePath = path.join(TEMP_DIR, files[file].path)
+		const filePath = files[file][0].path
 		fs.unlink(filePath, err => {
 			if (err) {
 				console.error(err)
