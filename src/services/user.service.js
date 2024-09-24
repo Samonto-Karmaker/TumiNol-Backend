@@ -1,6 +1,9 @@
 import { User } from "../models/User.js"
 import ApiError from "../utils/ApiError.js"
-import { uploadOnCloudinary } from "../utils/cloudinary.js"
+import {
+	deleteFromCloudinary,
+	uploadOnCloudinary,
+} from "../utils/cloudinary.js"
 
 const register = async (fullName, email, userName, password, files) => {
 	const avatarLocalPath = files?.avatar?.[0]?.path
@@ -26,24 +29,37 @@ const register = async (fullName, email, userName, password, files) => {
 		}
 	}
 
-	const user = await User.create({
-		fullName,
-		email,
-		userName: userName.toLowerCase(),
-		password,
-		avatar: avatar.url,
-		coverImage: coverImage?.url || "",
-	})
+	try {
+		const user = await User.create({
+			fullName,
+			email,
+			userName: userName.toLowerCase(),
+			password,
+			avatar: avatar.url,
+			coverImage: coverImage?.url || "",
+		})
 
-	const createdUser = await User.findById(user._id).select(
-		"-password -refreshToken"
-	)
+		const createdUser = await User.findById(user._id).select(
+			"-password -refreshToken"
+		)
+		if (!createdUser) {
+			throw new ApiError(500, "Failed to create user")
+		}
 
-	if (!createdUser) {
-		throw new ApiError(500, "Failed to create user")
+		return createdUser
+	} catch (error) {
+		if (avatar) {
+			await deleteFromCloudinary(avatar.public_id)
+		}
+		if (coverImage) {
+			await deleteFromCloudinary(coverImage.public_id)
+		}
+		throw new ApiError(
+			500,
+			"Failed to create user and uploaded images are deleted",
+			error
+		)
 	}
-
-	return createdUser
 }
 
 export { register }
