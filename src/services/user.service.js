@@ -39,14 +39,19 @@ const register = async (fullName, email, userName, password, files) => {
 			coverImage: coverImage?.url || "",
 		})
 
-		const createdUser = await User.findById(user._id).select(
-			"-password -refreshToken"
-		)
-		if (!createdUser) {
-			throw new ApiError(500, "Failed to create user")
-		}
+		try {
+			const createdUser = await User.findById(user._id).select(
+				"-password -refreshToken"
+			)
+			if (!createdUser) {
+				console.warn(`User not found with id: ${user._id}`)
+				throw new ApiError(404, "User not found")
+			}
 
-		return createdUser
+			return createdUser
+		} catch (error) {
+			throw new ApiError(500, "Failed to fetch user", error)
+		}
 	} catch (error) {
 		if (avatar) {
 			await deleteFromCloudinary(avatar.public_id)
