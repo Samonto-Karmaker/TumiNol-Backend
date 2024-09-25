@@ -89,4 +89,34 @@ const register = async (fullName, email, userName, password, files) => {
 	}
 }
 
-export { register }
+const login = async (username, password) => {
+	// I am expecting username to be either email or userName
+	if (!username || !password) {
+		throw new ApiError(400, "Username and password are required")
+	}
+
+	const user = await User.findOne({
+		$or: [{ email: username }, { userName: username }],
+	})
+	if (!user) {
+		throw new ApiError(404, "User not found")
+	}
+	if (!(await user.isPasswordMatch(password))) {
+		throw new ApiError(401, "Invalid credentials")
+	}
+
+	const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+		user._id
+	)
+
+	const loggedInUser = await User.findById(user._id).select(
+		"-password -refreshToken"
+	)
+	if (!loggedInUser) {
+		throw new ApiError(404, "User not found")
+	}
+
+	return { user: loggedInUser, accessToken, refreshToken }
+}
+
+export { register, login }
