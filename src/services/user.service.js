@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken"
 import { User } from "../models/User.js"
 import ApiError from "../utils/ApiError.js"
 import {
@@ -117,6 +118,40 @@ const login = async (username, password) => {
 	}
 
 	return { user: loggedInUser, accessToken, refreshToken }
+}
+
+const refreshAccessToken = async incomingRefreshToken => {
+	if (!incomingRefreshToken) {
+		throw new ApiError(400, "Refresh token is required")
+	}
+
+	try {
+		const decodedUser = jwt.verify(
+			incomingRefreshToken,
+			process.env.REFRESH_TOKEN_SECRET
+		)
+		if (!decodedUser) {
+			throw new ApiError(401, "Invalid refresh token")
+		}
+
+		const user = await User.findById(decodedUser?._id)
+		if (!user) {
+			throw new ApiError(404, "User not found")
+		}
+
+		if (incomingRefreshToken !== user.refreshToken) {
+			throw new ApiError(401, "Invalid refresh token")
+		}
+
+		const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+			user._id
+		)
+
+		return { accessToken, refreshToken }
+	} catch (error) {
+		console.error("Failed to refresh access token", error)
+		throw new ApiError(500, "Failed to refresh access token", error)
+	}
 }
 
 export { register, login }
