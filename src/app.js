@@ -24,7 +24,7 @@ app.use(
 	})
 )
 app.use(express.static("public"))
-app.use(cookieParser())
+app.use(cookieParser(process.env.COOKIE_SECRET))
 
 setupRouters(app)
 app.use(errorHandler)
