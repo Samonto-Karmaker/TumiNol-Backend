@@ -154,4 +154,4 @@ const refreshAccessToken = async incomingRefreshToken => {
 	}
 }
 
-export { register, login }
+export { register, login, refreshAccessToken }

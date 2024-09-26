@@ -1,6 +1,10 @@
 import asyncHandler from "../utils/asyncHandler.js"
 import ApiResponse from "../utils/ApiResponse.js"
-import { login, register } from "../services/user.service.js"
+import {
+	login,
+	refreshAccessToken,
+	register,
+} from "../services/user.service.js"
 import ms from "ms"
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -36,4 +40,29 @@ const loginUser = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "User logged in successfully", user))
 })
 
-export { registerUser, loginUser }
+const refreshAccessTokenController = asyncHandler(async (req, res) => {
+	const incomingRefreshToken = req.signedCookies?.refreshToken
+	const { accessToken, refreshToken } =
+		await refreshAccessToken(incomingRefreshToken)
+
+	const cookieOptions = {
+		httpOnly: true,
+		secure: process.env.NODE_ENV === "production",
+		sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+		signed: true,
+	}
+
+	res
+		.status(200)
+		.cookie("accessToken", accessToken, {
+			...cookieOptions,
+			maxAge: ms(process.env.ACCESS_TOKEN_EXPIRES_IN),
+		})
+		.cookie("refreshToken", refreshToken, {
+			...cookieOptions,
+			maxAge: ms(process.env.REFRESH_TOKEN_EXPIRES_IN),
+		})
+		.json(new ApiResponse(200, "Access token refreshed successfully"))
+})
+
+export { registerUser, loginUser, refreshAccessTokenController }
