@@ -120,6 +120,10 @@ const login = async (username, password) => {
 	return { user: loggedInUser, accessToken, refreshToken }
 }
 
+const logout = async userId => {
+	await User.findByIdAndUpdate(userId, { refreshToken: undefined })
+}
+
 const refreshAccessToken = async incomingRefreshToken => {
 	if (!incomingRefreshToken) {
 		throw new ApiError(400, "Refresh token is required")
@@ -154,4 +158,4 @@ const refreshAccessToken = async incomingRefreshToken => {
 	}
 }
 
-export { register, login, refreshAccessToken }
+export { register, login, refreshAccessToken, logout }

@@ -2,6 +2,7 @@ import asyncHandler from "../utils/asyncHandler.js"
 import ApiResponse from "../utils/ApiResponse.js"
 import {
 	login,
+	logout,
 	refreshAccessToken,
 	register,
 } from "../services/user.service.js"
@@ -40,6 +41,15 @@ const loginUser = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "User logged in successfully", user))
 })
 
+const logoutUser = asyncHandler(async (req, res) => {
+	await logout(req.user._id)
+	res
+		.status(200)
+		.clearCookie("accessToken")
+		.clearCookie("refreshToken")
+		.json(new ApiResponse(200, "User logged out successfully"))
+})
+
 const refreshAccessTokenController = asyncHandler(async (req, res) => {
 	const incomingRefreshToken = req.signedCookies?.refreshToken
 	const { accessToken, refreshToken } =
@@ -65,4 +75,4 @@ const refreshAccessTokenController = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "Access token refreshed successfully"))
 })
 
-export { registerUser, loginUser, refreshAccessTokenController }
+export { registerUser, loginUser, refreshAccessTokenController, logoutUser }
