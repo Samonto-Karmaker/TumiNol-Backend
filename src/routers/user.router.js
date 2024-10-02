@@ -2,6 +2,7 @@ import { Router } from "express"
 import { upload } from "../middlewares/common/multer.middleware.js"
 import {
 	changePasswordController,
+	getAuthenticatedUser,
 	loginUser,
 	logoutUser,
 	refreshAccessTokenController,
@@ -48,5 +49,6 @@ userRouter.patch(
 	checkAuth,
 	changePasswordController
 )
+userRouter.get("/me", checkAuth, getAuthenticatedUser)
 
 export default userRouter

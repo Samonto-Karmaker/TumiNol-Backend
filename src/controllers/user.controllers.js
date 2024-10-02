@@ -79,9 +79,20 @@ const refreshAccessTokenController = asyncHandler(async (req, res) => {
 const changePasswordController = asyncHandler(async (req, res) => {
 	const { oldPassword, newPassword } = req.body
 	await changePassword(req.user._id, oldPassword, newPassword)
-	res
-		.status(200)
-		.json(new ApiResponse(200, "Password changed successfully"))
+	res.status(200).json(new ApiResponse(200, "Password changed successfully"))
 })
 
-export { registerUser, loginUser, refreshAccessTokenController, logoutUser, changePasswordController }
+const getAuthenticatedUser = asyncHandler(async (req, res) => {
+	res
+		.status(200)
+		.json(new ApiResponse(200, "User fetched successfully", req.user))
+})
+
+export {
+	registerUser,
+	loginUser,
+	refreshAccessTokenController,
+	logoutUser,
+	changePasswordController,
+	getAuthenticatedUser,
+}
