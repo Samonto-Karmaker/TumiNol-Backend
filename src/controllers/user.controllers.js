@@ -1,6 +1,7 @@
 import asyncHandler from "../utils/asyncHandler.js"
 import ApiResponse from "../utils/ApiResponse.js"
 import {
+	changePassword,
 	login,
 	logout,
 	refreshAccessToken,
@@ -75,4 +76,12 @@ const refreshAccessTokenController = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "Access token refreshed successfully"))
 })
 
-export { registerUser, loginUser, refreshAccessTokenController, logoutUser }
+const changePasswordController = asyncHandler(async (req, res) => {
+	const { oldPassword, newPassword } = req.body
+	await changePassword(req.user._id, oldPassword, newPassword)
+	res
+		.status(200)
+		.json(new ApiResponse(200, "Password changed successfully"))
+})
+
+export { registerUser, loginUser, refreshAccessTokenController, logoutUser, changePasswordController }

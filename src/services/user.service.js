@@ -158,4 +158,24 @@ const refreshAccessToken = async incomingRefreshToken => {
 	}
 }
 
-export { register, login, refreshAccessToken, logout }
+const changePassword = async (userId, oldPassword, newPassword) => {
+	if (!oldPassword || !newPassword) {
+		throw new ApiError(400, "Old password and new password are required")
+	}
+	if (oldPassword === newPassword) {
+		throw new ApiError(400, "Old password and new password cannot be the same")
+	}
+
+	const user = await User.findById(userId)
+	if (!user) {
+		throw new ApiError(404, "User not found")
+	}
+	if (!(await user.isPasswordMatch(oldPassword))) {
+		throw new ApiError(401, "Invalid old password")
+	}
+
+	user.password = newPassword
+	await user.save()
+}
+
+export { register, login, refreshAccessToken, logout, changePassword }
