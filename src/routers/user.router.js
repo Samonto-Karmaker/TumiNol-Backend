@@ -1,10 +1,16 @@
 import { Router } from "express"
 import { upload } from "../middlewares/common/multer.middleware.js"
-import { registerUser } from "../controllers/user.controllers.js"
+import {
+	loginUser,
+	logoutUser,
+	refreshAccessTokenController,
+	registerUser,
+} from "../controllers/user.controllers.js"
 import {
 	registerValidator,
 	registerValidatorMiddleware,
 } from "../middlewares/user/registerValidator.middleware.js"
+import { checkAuth } from "../middlewares/common/authCheck.middleware.js"
 
 const userRouter = Router()
 
@@ -24,5 +30,11 @@ userRouter.post(
 	registerValidatorMiddleware,
 	registerUser
 )
+
+userRouter.post("/login", loginUser)
+userRouter.post("/refresh-token", refreshAccessTokenController)
+
+// Protected routes
+userRouter.post("/logout", checkAuth, logoutUser)
 
 export default userRouter
