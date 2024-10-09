@@ -7,6 +7,7 @@ import {
 	refreshAccessToken,
 	register,
 	updateAvatar,
+	updateCoverImage,
 } from "../services/user.service.js"
 import ms from "ms"
 
@@ -96,6 +97,13 @@ const updateAvatarController = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "Avatar updated successfully", updatedUser))
 })
 
+const updateCoverImageController = asyncHandler(async (req, res) => {
+	const updatedUser = await updateCoverImage(req.user._id, req.file)
+	res
+		.status(200)
+		.json(new ApiResponse(200, "Cover image updated successfully", updatedUser))
+})
+
 export {
 	registerUser,
 	loginUser,
@@ -104,4 +112,5 @@ export {
 	changePasswordController,
 	getAuthenticatedUser,
 	updateAvatarController,
+	updateCoverImageController,
 }

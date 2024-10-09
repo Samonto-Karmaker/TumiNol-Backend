@@ -210,4 +210,41 @@ const updateAvatar = async (userId, file) => {
 	return user.save()
 }
 
-export { register, login, refreshAccessToken, logout, changePassword, updateAvatar }
+const updateCoverImage = async (userId, file) => {
+	if (!userId) {
+		throw new ApiError(400, "User id is required")
+	}
+
+	const coverImageLocalPath = file?.path
+	if (!coverImageLocalPath) {
+		throw new ApiError(400, "Cover image is required")
+	}
+
+	const coverImage = await uploadOnCloudinary(coverImageLocalPath)
+	if (!coverImage?.url) {
+		throw new ApiError(500, "Failed to upload cover image")
+	}
+
+	const user = await User.findById(userId).select("-password -refreshToken")
+	if (!user) {
+		throw new ApiError(404, "User not found")
+	}
+
+	const oldCoverImagePublicId = extractPublicId(user.coverImage)
+	if (oldCoverImagePublicId) {
+		await deleteFromCloudinary(oldCoverImagePublicId)
+	}
+
+	user.coverImage = coverImage.url
+	return user.save()
+}
+
+export {
+	register,
+	login,
+	refreshAccessToken,
+	logout,
+	changePassword,
+	updateAvatar,
+	updateCoverImage,
+}

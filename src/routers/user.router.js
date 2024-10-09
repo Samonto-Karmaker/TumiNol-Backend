@@ -8,6 +8,7 @@ import {
 	refreshAccessTokenController,
 	registerUser,
 	updateAvatarController,
+	updateCoverImageController,
 } from "../controllers/user.controllers.js"
 import {
 	registerValidator,
@@ -56,6 +57,12 @@ userRouter.patch(
 	checkAuth,
 	upload.single("avatar"),
 	updateAvatarController
+)
+userRouter.patch(
+	"/update-cover-image",
+	checkAuth,
+	upload.single("coverImage"),
+	updateCoverImageController
 )
 
 export default userRouter
