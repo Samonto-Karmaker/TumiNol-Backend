@@ -6,6 +6,7 @@ import {
 	logout,
 	refreshAccessToken,
 	register,
+	updateAvatar,
 } from "../services/user.service.js"
 import ms from "ms"
 
@@ -88,6 +89,13 @@ const getAuthenticatedUser = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "User fetched successfully", req.user))
 })
 
+const updateAvatarController = asyncHandler(async (req, res) => {
+	const updatedUser = await updateAvatar(req.user._id, req.file)
+	res
+		.status(200)
+		.json(new ApiResponse(200, "Avatar updated successfully", updatedUser))
+})
+
 export {
 	registerUser,
 	loginUser,
@@ -95,4 +103,5 @@ export {
 	logoutUser,
 	changePasswordController,
 	getAuthenticatedUser,
+	updateAvatarController,
 }

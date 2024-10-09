@@ -5,6 +5,7 @@ import {
 	deleteFromCloudinary,
 	uploadOnCloudinary,
 } from "../utils/cloudinary.js"
+import { extractPublicId } from "cloudinary-build-url"
 
 // Helper functions
 const generateAccessAndRefreshToken = async userId => {
@@ -121,7 +122,9 @@ const login = async (username, password) => {
 }
 
 const logout = async userId => {
-	await User.findByIdAndUpdate(userId, { refreshToken: undefined })
+	await User.findByIdAndUpdate(userId, {
+		$set: { refreshToken: "" },
+	})
 }
 
 const refreshAccessToken = async incomingRefreshToken => {
@@ -178,4 +181,33 @@ const changePassword = async (userId, oldPassword, newPassword) => {
 	await user.save()
 }
 
-export { register, login, refreshAccessToken, logout, changePassword }
+const updateAvatar = async (userId, file) => {
+	if (!userId) {
+		throw new ApiError(400, "User id is required")
+	}
+
+	const avatarLocalPath = file?.path
+	if (!avatarLocalPath) {
+		throw new ApiError(400, "Avatar is required")
+	}
+
+	const avatar = await uploadOnCloudinary(avatarLocalPath)
+	if (!avatar?.url) {
+		throw new ApiError(500, "Failed to upload avatar")
+	}
+
+	const user = await User.findById(userId).select("-password -refreshToken")
+	if (!user) {
+		throw new ApiError(404, "User not found")
+	}
+
+	const oldAvatarPublicId = extractPublicId(user.avatar)
+	if (oldAvatarPublicId) {
+		await deleteFromCloudinary(oldAvatarPublicId)
+	}
+
+	user.avatar = avatar.url
+	return user.save()
+}
+
+export { register, login, refreshAccessToken, logout, changePassword, updateAvatar }

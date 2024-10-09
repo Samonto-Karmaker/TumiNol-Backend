@@ -7,6 +7,7 @@ import {
 	logoutUser,
 	refreshAccessTokenController,
 	registerUser,
+	updateAvatarController,
 } from "../controllers/user.controllers.js"
 import {
 	registerValidator,
@@ -50,5 +51,11 @@ userRouter.patch(
 	changePasswordController
 )
 userRouter.get("/me", checkAuth, getAuthenticatedUser)
+userRouter.patch(
+	"/update-avatar",
+	checkAuth,
+	upload.single("avatar"),
+	updateAvatarController
+)
 
 export default userRouter
