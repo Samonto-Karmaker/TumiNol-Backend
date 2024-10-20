@@ -2,6 +2,7 @@ import asyncHandler from "../utils/asyncHandler.js"
 import ApiResponse from "../utils/ApiResponse.js"
 import {
 	changePassword,
+	getChannelProfile,
 	login,
 	logout,
 	refreshAccessToken,
@@ -104,6 +105,14 @@ const updateCoverImageController = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "Cover image updated successfully", updatedUser))
 })
 
+const getChannelProfileController = asyncHandler(async (req, res) => {
+	const useName = req.params.userName
+	const channel = await getChannelProfile(useName, req.user?._id)
+	res
+		.status(200)
+		.json(new ApiResponse(200, "Channel profile fetched successfully", channel))
+})
+
 export {
 	registerUser,
 	loginUser,
@@ -113,4 +122,5 @@ export {
 	getAuthenticatedUser,
 	updateAvatarController,
 	updateCoverImageController,
+	getChannelProfileController,
 }

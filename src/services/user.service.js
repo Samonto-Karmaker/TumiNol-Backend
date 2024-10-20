@@ -252,7 +252,7 @@ const getChannelProfile = async (userName, accessingUserId) => {
 
 	const channel = await User.aggregate([
 		{
-			$match: { userName: userName.toLowerCase()}
+			$match: { userName: userName.toLowerCase() },
 		},
 		{
 			$lookup: {
@@ -260,7 +260,7 @@ const getChannelProfile = async (userName, accessingUserId) => {
 				localField: "_id",
 				foreignField: "channel",
 				as: "subscribers",
-			}
+			},
 		},
 		{
 			$lookup: {
@@ -268,19 +268,19 @@ const getChannelProfile = async (userName, accessingUserId) => {
 				localField: "_id",
 				foreignField: "subscriber",
 				as: "subscribedTo",
-			}
+			},
 		},
 		{
 			$addFields: {
 				subscriberCount: { $size: "$subscribers" },
-				subscribeToCount: { 
+				subscribeToCount: {
 					$cond: {
 						if: {
 							$eq: ["$_id", accessingUserId],
 						},
 						then: { $size: "$subscribedTo" },
-						else: $$REMOVE,
-					}
+						else: -1,
+					},
 				},
 				isSubscribed: {
 					$cond: {
@@ -289,10 +289,11 @@ const getChannelProfile = async (userName, accessingUserId) => {
 						},
 						then: true,
 						else: false,
-					}
-				}
+					},
+				},
 			},
-		}, {
+		},
+		{
 			$project: {
 				fullName: 1,
 				userName: 1,
@@ -301,8 +302,8 @@ const getChannelProfile = async (userName, accessingUserId) => {
 				subscriberCount: 1,
 				subscribeToCount: 1,
 				isSubscribed: 1,
-			}
-		}
+			},
+		},
 	])
 
 	console.log("Channel", channel)

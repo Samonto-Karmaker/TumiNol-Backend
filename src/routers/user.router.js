@@ -3,6 +3,7 @@ import { upload } from "../middlewares/common/multer.middleware.js"
 import {
 	changePasswordController,
 	getAuthenticatedUser,
+	getChannelProfileController,
 	loginUser,
 	logoutUser,
 	refreshAccessTokenController,
@@ -64,5 +65,6 @@ userRouter.patch(
 	upload.single("coverImage"),
 	updateCoverImageController
 )
+userRouter.get("/channel/:userName", checkAuth, getChannelProfileController)
 
 export default userRouter
