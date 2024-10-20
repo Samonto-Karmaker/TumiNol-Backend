@@ -239,6 +239,80 @@ const updateCoverImage = async (userId, file) => {
 	return user.save()
 }
 
+// Here we will only send the following information to the client
+// Full Name, Username, Avatar, Cover Image, SubscriberCount, IsSubscribed
+// If the user is the owner of the channel, we will also send the SubscribeToCount
+const getChannelProfile = async (userName, accessingUserId) => {
+	if (!userName || userName.trim() === "") {
+		throw new ApiError(400, "Username is required")
+	}
+	if (!accessingUserId) {
+		throw new ApiError(400, "Accessing user id is required")
+	}
+
+	const channel = await User.aggregate([
+		{
+			$match: { userName: userName.toLowerCase()}
+		},
+		{
+			$lookup: {
+				from: "subscriptions",
+				localField: "_id",
+				foreignField: "channel",
+				as: "subscribers",
+			}
+		},
+		{
+			$lookup: {
+				from: "subscriptions",
+				localField: "_id",
+				foreignField: "subscriber",
+				as: "subscribedTo",
+			}
+		},
+		{
+			$addFields: {
+				subscriberCount: { $size: "$subscribers" },
+				subscribeToCount: { 
+					$cond: {
+						if: {
+							$eq: ["$_id", accessingUserId],
+						},
+						then: { $size: "$subscribedTo" },
+						else: $$REMOVE,
+					}
+				},
+				isSubscribed: {
+					$cond: {
+						if: {
+							$in: [accessingUserId, "$subscribers.subscriber"],
+						},
+						then: true,
+						else: false,
+					}
+				}
+			},
+		}, {
+			$project: {
+				fullName: 1,
+				userName: 1,
+				avatar: 1,
+				coverImage: 1,
+				subscriberCount: 1,
+				subscribeToCount: 1,
+				isSubscribed: 1,
+			}
+		}
+	])
+
+	console.log("Channel", channel)
+	if (!channel || channel.length === 0) {
+		throw new ApiError(404, "Channel not found")
+	}
+
+	return channel[0]
+}
+
 export {
 	register,
 	login,
@@ -247,4 +321,5 @@ export {
 	changePassword,
 	updateAvatar,
 	updateCoverImage,
+	getChannelProfile,
 }
