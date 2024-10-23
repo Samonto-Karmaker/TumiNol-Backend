@@ -1,11 +1,12 @@
 import { Subscription } from "../models/Subscription.js"
-import ApiError from "../utils/ApiError.js"
 import { User } from "../models/User.js"
+import ApiError from "../utils/ApiError.js"
+import { isValidObjectId } from "../utils/validateObjectId.js"
 
 // Service functions
 const toggleSubscription = async (channelId, userId) => {
-    if (!channelId) {
-        throw new ApiError(400, "Channel ID is required")
+    if (!channelId || !isValidObjectId(channelId)) {
+        throw new ApiError(400, "A valid channel ID is required")
     }
     if (!userId) {
         throw new ApiError(400, "User ID is required")
