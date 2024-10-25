@@ -12,15 +12,21 @@ const toggleSubscription = async (channelId, userId) => {
 		throw new ApiError(400, "User ID is required")
 	}
 
+    let errorMessage = "Failed to toggle subscription"
+    let errorStatusCode = 500
 	try {
 		let isSubscribed
 
 		const channel = await User.findById(channelId).select("_id")
 		if (!channel) {
+            errorStatusCode = 404
+            errorMessage = "Channel not found"
 			throw new ApiError(404, "Channel not found")
 		}
 
         if (channel._id.equals(userId)) {
+            errorStatusCode = 400
+            errorMessage = "You cannot subscribe to yourself"
             throw new ApiError(400, "You cannot subscribe to yourself")
         }
 
@@ -42,7 +48,7 @@ const toggleSubscription = async (channelId, userId) => {
 		return isSubscribed
 	} catch (error) {
 		console.error("Failed to toggle subscription", error)
-		throw new ApiError(500, "Failed to toggle subscription")
+		throw new ApiError(errorStatusCode, errorMessage)
 	}
 }
 
