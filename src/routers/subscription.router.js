@@ -9,7 +9,7 @@ const subscriptionRouter = Router()
 
 subscriptionRouter.use(checkAuth)
 
-subscriptionRouter.route("/channel").get(getSubscriberListController)
+subscriptionRouter.route("/subscribers").get(getSubscriberListController)
 subscriptionRouter
 	.route("/channel/:channelId")
 	.post(toggleSubscriptionController)
