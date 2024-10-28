@@ -12,23 +12,23 @@ const toggleSubscription = async (channelId, userId) => {
 		throw new ApiError(400, "User ID is required")
 	}
 
-    let errorMessage = "Failed to toggle subscription"
-    let errorStatusCode = 500
+	let errorMessage = "Failed to toggle subscription"
+	let errorStatusCode = 500
 	try {
 		let isSubscribed
 
 		const channel = await User.findById(channelId).select("_id")
 		if (!channel) {
-            errorStatusCode = 404
-            errorMessage = "Channel not found"
+			errorStatusCode = 404
+			errorMessage = "Channel not found"
 			throw new ApiError(404, "Channel not found")
 		}
 
-        if (channel._id.equals(userId)) {
-            errorStatusCode = 400
-            errorMessage = "You cannot subscribe to yourself"
-            throw new ApiError(400, "You cannot subscribe to yourself")
-        }
+		if (channel._id.equals(userId)) {
+			errorStatusCode = 400
+			errorMessage = "You cannot subscribe to yourself"
+			throw new ApiError(400, "You cannot subscribe to yourself")
+		}
 
 		const existingSubscriptions = await Subscription.findOne({
 			subscriber: userId,
@@ -52,7 +52,7 @@ const toggleSubscription = async (channelId, userId) => {
 	}
 }
 
-const getSubscriberList = async (userId) => {
+const getSubscriberList = async userId => {
 	if (!userId) {
 		throw new ApiError(400, "User ID is required")
 	}
@@ -73,14 +73,14 @@ const getSubscriberList = async (userId) => {
 			},
 			{
 				$unwind: "$subscriberList",
-			}, 
+			},
 			{
 				$project: {
 					_id: "$subscriberList._id",
 					userName: "$subscriberList.userName",
 					avatar: "$subscriberList.avatar",
 				},
-			}
+			},
 		])
 
 		return subscriberList
@@ -90,4 +90,42 @@ const getSubscriberList = async (userId) => {
 	}
 }
 
-export { toggleSubscription, getSubscriberList }
+const getSubscribedChannels = async userId => {
+	if (!userId) {
+		throw new ApiError(400, "User ID is required")
+	}
+	try {
+		const subscribedChannels = await Subscription.aggregate([
+			{
+				$match: {
+					subscriber: userId,
+				},
+			},
+			{
+				$lookup: {
+					from: "users",
+					localField: "channel",
+					foreignField: "_id",
+					as: "channelList",
+				},
+			},
+			{
+				$unwind: "$channelList",
+			},
+			{
+				$project: {
+					_id: "$channelList._id",
+					userName: "$channelList.userName",
+					avatar: "$channelList.avatar",
+				},
+			},
+		])
+
+		return subscribedChannels
+	} catch (error) {
+		console.error("Failed to get subscribed channels", error)
+		throw new ApiError(500, "Failed to get subscribed channels")
+	}
+}
+
+export { toggleSubscription, getSubscriberList, getSubscribedChannels }

@@ -3,6 +3,7 @@ import ApiResponse from "../utils/ApiResponse.js"
 import {
 	toggleSubscription,
 	getSubscriberList,
+	getSubscribedChannels,
 } from "../services/subscription.service.js"
 
 const toggleSubscriptionController = asyncHandler(async (req, res) => {
@@ -26,4 +27,17 @@ const getSubscriberListController = asyncHandler(async (req, res) => {
 		)
 })
 
-export { toggleSubscriptionController, getSubscriberListController }
+const getSubscribedChannelsController = asyncHandler(async (req, res) => {
+	const subscribedChannels = await getSubscribedChannels(req.user._id)
+	res
+		.status(200)
+		.json(
+			new ApiResponse(
+				200,
+				"Subscribed channels retrieved successfully",
+				subscribedChannels
+			)
+		)
+})
+
+export { toggleSubscriptionController, getSubscriberListController, getSubscribedChannelsController }
