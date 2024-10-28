@@ -52,4 +52,42 @@ const toggleSubscription = async (channelId, userId) => {
 	}
 }
 
-export { toggleSubscription }
+const getSubscriberList = async (userId) => {
+	if (!userId) {
+		throw new ApiError(400, "User ID is required")
+	}
+	try {
+		const subscriberList = await Subscription.aggregate([
+			{
+				$match: {
+					channel: userId,
+				},
+			},
+			{
+				$lookup: {
+					from: "users",
+					localField: "subscriber",
+					foreignField: "_id",
+					as: "subscriberList",
+				},
+			},
+			{
+				$unwind: "$subscriberList",
+			}, 
+			{
+				$project: {
+					_id: "$subscriberList._id",
+					userName: "$subscriberList.userName",
+					avatar: "$subscriberList.avatar",
+				},
+			}
+		])
+
+		return subscriberList
+	} catch (error) {
+		console.error("Failed to get subscriber list", error)
+		throw new ApiError(500, "Failed to get subscriber list")
+	}
+}
+
+export { toggleSubscription, getSubscriberList }
