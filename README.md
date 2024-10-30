@@ -31,7 +31,7 @@ TumiNol-Backend is a prototype project of the backend of the famous video-sharin
 1. Clone the repository:
 
     ```sh
-    git clone https://github.com/yourusername/tuminol-backend.git
+    git clone https://github.com/Samonto-Karmaker/TumiNol-Backend.git
     cd tuminol-backend
     ```
 
