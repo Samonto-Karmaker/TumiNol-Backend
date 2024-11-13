@@ -93,7 +93,72 @@ const getPostById = async (postId, accessingUserId) => {
 	}
 }
 
-const getPostByOwnerId = async (ownerId, accessingUserId) => {}
+const getPostByOwnerId = async (ownerId, accessingUserId) => {
+	if (!ownerId || !isValidObjectId(ownerId)) {
+		throw new ApiError(400, "A valid owner ID is required")
+	}
+	if (!accessingUserId) {
+		throw new ApiError(400, "Accessing user ID is required")
+	}
+
+	try {
+		const posts = await Post.aggregate([
+			{
+				$match: {
+					owner: mongoose.Types.ObjectId(ownerId),
+				}
+			},
+			{
+				$lookup: {
+					from: "users",
+					localField: "owner",
+					foreignField: "_id",
+					as: "owner",
+				},
+			},
+			{
+				$unwind: "$owner",
+			},
+			{
+				$lookup: {
+					from: "likes",
+					localField: "_id",
+					foreignField: "post",
+					as: "likes",
+				},
+			},
+			{
+				$addFields: {
+					likeCount: { $size: "$likes" },
+					isLiked: {
+						$in: [accessingUserId, "$likes.likedBy"],
+					},
+				},
+			},
+			{
+				$project: {
+					content: 1,
+					likeCount: 1,
+					isLiked: 1,
+					owner: {
+						_id: 1,
+						fullName: 1,
+						avatar: 1,
+					},
+				},
+			},
+		])
+
+		if (!posts || posts.length === 0) {
+			throw new ApiError(404, "Posts not found")
+		}
+
+		return posts
+	} catch (error) {
+		console.error("Failed to get posts", error)
+		throw new ApiError(500, "Failed to get posts")
+	}
+}
 
 const editPost = async (postId, ownerId, content) => {}
 
