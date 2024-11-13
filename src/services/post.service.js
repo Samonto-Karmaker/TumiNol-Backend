@@ -119,7 +119,35 @@ const getPostByOwnerId = async (ownerId, accessingUserId) => {
 	}
 }
 
-const editPost = async (postId, ownerId, content) => {}
+const editPost = async (postId, ownerId, content) => {
+	if (!postId || !isValidObjectId(postId)) {
+		throw new ApiError(400, "A valid post ID is required")
+	}
+	if (!ownerId) {
+		throw new ApiError(400, "Owner ID is required")
+	}
+	if (!content || content.trim() === "") {
+		throw new ApiError(400, "Content is required")
+	}
+	if (content.length > 500) {
+		throw new ApiError(400, "Content is too long")
+	}
+
+	try {
+		const post = await Post.findById(postId)
+		if (!post) {
+			throw new ApiError(404, "Post not found")
+		}
+		if (post.owner.toString() !== ownerId.toString()) {
+			throw new ApiError(403, "You are not authorized to edit this post")
+		}
+		post.content = content
+		return await post.save()
+	} catch (error) {
+		console.error("Failed to edit post", error)
+		throw new ApiError(500, "Failed to edit post")
+	}
+}
 
 const deletePost = async (postId, ownerId) => {}
 
