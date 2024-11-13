@@ -3,6 +3,55 @@ import { Post } from "../models/Post.js"
 import ApiError from "../utils/ApiError.js"
 import { isValidObjectId } from "../utils/validateObjectId.js"
 
+// Helper functions
+const getPostAggregate = (match, accessingUserId) => [
+	{
+		$match: {
+			_id: mongoose.Types.ObjectId(match),
+		},
+	},
+	{
+		$lookup: {
+			from: "users",
+			localField: "owner",
+			foreignField: "_id",
+			as: "owner",
+		},
+	},
+	{
+		$unwind: "$owner",
+	},
+	{
+		$lookup: {
+			from: "likes",
+			localField: "_id",
+			foreignField: "post",
+			as: "likes",
+		},
+	},
+	{
+		$addFields: {
+			likeCount: { $size: "$likes" },
+			isLiked: {
+				$in: [accessingUserId, "$likes.likedBy"],
+			},
+		},
+	},
+	{
+		$project: {
+			content: 1,
+			likeCount: 1,
+			isLiked: 1,
+			owner: {
+				_id: 1,
+				fullName: 1,
+				avatar: 1,
+			},
+		},
+	},
+]
+
+// Service functions
 const createPost = async (ownerId, content) => {
 	if (!ownerId) {
 		throw new ApiError(400, "Owner ID is required")
@@ -35,52 +84,7 @@ const getPostById = async (postId, accessingUserId) => {
 	}
 
 	try {
-		const postWithMetadata = await Post.aggregate([
-			{
-				$match: {
-					_id: mongoose.Types.ObjectId(postId),
-				},
-			},
-			{
-				$lookup: {
-					from: "users",
-					localField: "owner",
-					foreignField: "_id",
-					as: "owner",
-				},
-			},
-			{
-				$unwind: "$owner",
-			},
-			{
-				$lookup: {
-					from: "likes",
-					localField: "_id",
-					foreignField: "post",
-					as: "likes",
-				},
-			},
-			{
-				$addFields: {
-					likeCount: { $size: "$likes" },
-					isLiked: {
-						$in: [accessingUserId, "$likes.likedBy"],
-					},
-				},
-			},
-			{
-				$project: {
-					content: 1,
-					likeCount: 1,
-					isLiked: 1,
-					owner: {
-						_id: 1,
-						fullName: 1,
-						avatar: 1,
-					},
-				},
-			},
-		])
+		const postWithMetadata = await Post.aggregate(getPostAggregate(postId, accessingUserId))
 
 		if (!postWithMetadata || postWithMetadata.length === 0) {
 			throw new ApiError(404, "Post not found")
@@ -102,52 +106,7 @@ const getPostByOwnerId = async (ownerId, accessingUserId) => {
 	}
 
 	try {
-		const posts = await Post.aggregate([
-			{
-				$match: {
-					owner: mongoose.Types.ObjectId(ownerId),
-				}
-			},
-			{
-				$lookup: {
-					from: "users",
-					localField: "owner",
-					foreignField: "_id",
-					as: "owner",
-				},
-			},
-			{
-				$unwind: "$owner",
-			},
-			{
-				$lookup: {
-					from: "likes",
-					localField: "_id",
-					foreignField: "post",
-					as: "likes",
-				},
-			},
-			{
-				$addFields: {
-					likeCount: { $size: "$likes" },
-					isLiked: {
-						$in: [accessingUserId, "$likes.likedBy"],
-					},
-				},
-			},
-			{
-				$project: {
-					content: 1,
-					likeCount: 1,
-					isLiked: 1,
-					owner: {
-						_id: 1,
-						fullName: 1,
-						avatar: 1,
-					},
-				},
-			},
-		])
+		const posts = await Post.aggregate(getPostAggregate(ownerId, accessingUserId))
 
 		if (!posts || posts.length === 0) {
 			throw new ApiError(404, "Posts not found")
