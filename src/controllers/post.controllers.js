@@ -2,6 +2,7 @@ import asyncHandler from "../utils/asyncHandler.js"
 import ApiResponse from "../utils/ApiResponse.js"
 import {
 	createPost,
+	editPost,
 	getPostById,
 	getPostByOwnerName,
 } from "../services/post.service.js"
@@ -24,8 +25,16 @@ const getPostByOwnerNameController = asyncHandler(async (req, res) => {
 	res.json(new ApiResponse(200, "Posts retrieved successfully", posts))
 })
 
+const editPostController = asyncHandler(async (req, res) => {
+    const { postId } = req.params
+    const { content } = req.body
+    const post = await editPost(postId, req.user._id, content)
+    res.json(new ApiResponse(200, "Post edited successfully", post))
+})
+
 export {
 	createPostController,
 	getPostByIdController,
 	getPostByOwnerNameController,
+    editPostController,
 }
