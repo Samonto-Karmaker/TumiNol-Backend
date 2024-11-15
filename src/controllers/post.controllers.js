@@ -1,6 +1,10 @@
 import asyncHandler from "../utils/asyncHandler.js"
 import ApiResponse from "../utils/ApiResponse.js"
-import { createPost, getPostById } from "../services/post.service.js"
+import {
+	createPost,
+	getPostById,
+	getPostByOwnerName,
+} from "../services/post.service.js"
 
 const createPostController = asyncHandler(async (req, res) => {
 	const { content } = req.body
@@ -14,4 +18,14 @@ const getPostByIdController = asyncHandler(async (req, res) => {
 	res.json(new ApiResponse(200, "Post retrieved successfully", post))
 })
 
-export { createPostController, getPostByIdController }
+const getPostByOwnerNameController = asyncHandler(async (req, res) => {
+	const { ownerName } = req.params
+	const posts = await getPostByOwnerName(ownerName, req.user._id)
+	res.json(new ApiResponse(200, "Posts retrieved successfully", posts))
+})
+
+export {
+	createPostController,
+	getPostByIdController,
+	getPostByOwnerNameController,
+}

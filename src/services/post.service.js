@@ -2,12 +2,16 @@ import mongoose from "mongoose"
 import { Post } from "../models/Post.js"
 import ApiError from "../utils/ApiError.js"
 import { isValidObjectId } from "../utils/validateObjectId.js"
+import { User } from "../models/User.js"
 
 // Helper functions
 const getPostAggregate = (match, accessingUserId) => [
 	{
 		$match: {
-			_id: new mongoose.Types.ObjectId(match),
+			$or: [
+				{ _id: new mongoose.Types.ObjectId(match) },
+				{ owner: new mongoose.Types.ObjectId(match) },
+			],
 		},
 	},
 	{
@@ -99,8 +103,8 @@ const getPostById = async (postId, accessingUserId) => {
 	}
 }
 
-const getPostByOwnerId = async (ownerId, accessingUserId) => {
-	if (!ownerId || !isValidObjectId(ownerId)) {
+const getPostByOwnerName = async (ownerName, accessingUserId) => {
+	if (!ownerName) {
 		throw new ApiError(400, "A valid owner ID is required")
 	}
 	if (!accessingUserId) {
@@ -108,8 +112,13 @@ const getPostByOwnerId = async (ownerId, accessingUserId) => {
 	}
 
 	try {
+		const owner = await User.findOne({ userName: ownerName }).select("_id")
+		if (!owner) {
+			throw new ApiError(404, "Owner not found")
+		}
+
 		const posts = await Post.aggregate(
-			getPostAggregate(ownerId, accessingUserId)
+			getPostAggregate(owner._id, accessingUserId)
 		)
 
 		if (!posts || posts.length === 0) {
@@ -176,4 +185,4 @@ const deletePost = async (postId, ownerId) => {
 	}
 }
 
-export { createPost, getPostById, getPostByOwnerId, editPost, deletePost }
+export { createPost, getPostById, getPostByOwnerName, editPost, deletePost }
