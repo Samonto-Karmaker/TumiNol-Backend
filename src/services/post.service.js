@@ -7,7 +7,7 @@ import { isValidObjectId } from "../utils/validateObjectId.js"
 const getPostAggregate = (match, accessingUserId) => [
 	{
 		$match: {
-			_id: mongoose.Types.ObjectId(match),
+			_id: new mongoose.Types.ObjectId(match),
 		},
 	},
 	{
@@ -84,7 +84,9 @@ const getPostById = async (postId, accessingUserId) => {
 	}
 
 	try {
-		const postWithMetadata = await Post.aggregate(getPostAggregate(postId, accessingUserId))
+		const postWithMetadata = await Post.aggregate(
+			getPostAggregate(postId, accessingUserId)
+		)
 
 		if (!postWithMetadata || postWithMetadata.length === 0) {
 			throw new ApiError(404, "Post not found")
@@ -106,7 +108,9 @@ const getPostByOwnerId = async (ownerId, accessingUserId) => {
 	}
 
 	try {
-		const posts = await Post.aggregate(getPostAggregate(ownerId, accessingUserId))
+		const posts = await Post.aggregate(
+			getPostAggregate(ownerId, accessingUserId)
+		)
 
 		if (!posts || posts.length === 0) {
 			throw new ApiError(404, "Posts not found")
