@@ -180,7 +180,7 @@ const deletePost = async (postId, ownerId) => {
 		if (post.owner.toString() !== ownerId.toString()) {
 			throw new ApiError(403, "You are not authorized to delete this post")
 		}
-		return await post.remove()
+		await Post.findByIdAndDelete(post._id)
 	} catch (error) {
 		console.error("Failed to delete post", error)
 		throw new ApiError(500, "Failed to delete post")

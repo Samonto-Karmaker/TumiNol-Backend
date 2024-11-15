@@ -2,6 +2,7 @@ import asyncHandler from "../utils/asyncHandler.js"
 import ApiResponse from "../utils/ApiResponse.js"
 import {
 	createPost,
+	deletePost,
 	editPost,
 	getPostById,
 	getPostByOwnerName,
@@ -32,9 +33,16 @@ const editPostController = asyncHandler(async (req, res) => {
     res.json(new ApiResponse(200, "Post edited successfully", post))
 })
 
+const deletePostController = asyncHandler(async (req, res) => {
+    const { postId } = req.params
+    await deletePost(postId, req.user._id)
+    res.json(new ApiResponse(200, "Post deleted successfully"))
+})
+
 export {
 	createPostController,
 	getPostByIdController,
 	getPostByOwnerNameController,
     editPostController,
+    deletePostController,
 }
