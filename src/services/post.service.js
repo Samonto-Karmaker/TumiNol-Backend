@@ -149,6 +149,27 @@ const editPost = async (postId, ownerId, content) => {
 	}
 }
 
-const deletePost = async (postId, ownerId) => {}
+const deletePost = async (postId, ownerId) => {
+	if (!postId || !isValidObjectId(postId)) {
+		throw new ApiError(400, "A valid post ID is required")
+	}
+	if (!ownerId) {
+		throw new ApiError(400, "Owner ID is required")
+	}
+
+	try {
+		const post = await Post.findById(postId)
+		if (!post) {
+			throw new ApiError(404, "Post not found")
+		}
+		if (post.owner.toString() !== ownerId.toString()) {
+			throw new ApiError(403, "You are not authorized to delete this post")
+		}
+		return await post.remove()
+	} catch (error) {
+		console.error("Failed to delete post", error)
+		throw new ApiError(500, "Failed to delete post")
+	}
+}
 
 export { createPost, getPostById, getPostByOwnerId, editPost, deletePost }
