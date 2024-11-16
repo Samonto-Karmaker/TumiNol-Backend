@@ -5,7 +5,6 @@ import { isValidObjectId } from "../utils/validateObjectId.js"
 import { User } from "../models/User.js"
 
 // Helper functions
-// TODO: The data should include if the post is edited or not
 const getPostAggregate = (match, accessingUserId) => [
 	{
 		$match: {
@@ -13,6 +12,11 @@ const getPostAggregate = (match, accessingUserId) => [
 				{ _id: new mongoose.Types.ObjectId(match) },
 				{ owner: new mongoose.Types.ObjectId(match) },
 			],
+		},
+	},
+	{
+		$sort: {
+			createdAt: -1,
 		},
 	},
 	{
@@ -45,8 +49,8 @@ const getPostAggregate = (match, accessingUserId) => [
 					if: { $ne: ["$createdAt", "$updatedAt"] },
 					then: true,
 					else: false,
-				}
-			}
+				},
+			},
 		},
 	},
 	{
@@ -112,7 +116,6 @@ const getPostById = async (postId, accessingUserId) => {
 	}
 }
 
-// TODO: The data should be sorted by the most recent post
 const getPostByOwnerName = async (ownerName, accessingUserId) => {
 	if (!ownerName) {
 		throw new ApiError(400, "A valid owner ID is required")
