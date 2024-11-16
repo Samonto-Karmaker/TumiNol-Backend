@@ -40,6 +40,13 @@ const getPostAggregate = (match, accessingUserId) => [
 			isLiked: {
 				$in: [accessingUserId, "$likes.likedBy"],
 			},
+			isEdited: {
+				$cond: {
+					if: { $ne: ["$createdAt", "$updatedAt"] },
+					then: true,
+					else: false,
+				}
+			}
 		},
 	},
 	{
@@ -47,6 +54,7 @@ const getPostAggregate = (match, accessingUserId) => [
 			content: 1,
 			likeCount: 1,
 			isLiked: 1,
+			isEdited: 1,
 			owner: {
 				_id: 1,
 				fullName: 1,
