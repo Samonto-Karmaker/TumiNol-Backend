@@ -116,7 +116,12 @@ const getPostById = async (postId, accessingUserId) => {
 	}
 }
 
-const getPostByOwnerName = async (ownerName, accessingUserId) => {
+const getPostByOwnerName = async (
+	ownerName,
+	accessingUserId,
+	page = 1,
+	limit = 10
+) => {
 	if (!ownerName) {
 		throw new ApiError(400, "A valid owner ID is required")
 	}
@@ -130,15 +135,35 @@ const getPostByOwnerName = async (ownerName, accessingUserId) => {
 			throw new ApiError(404, "Owner not found")
 		}
 
-		const posts = await Post.aggregate(
-			getPostAggregate(owner._id, accessingUserId)
-		)
+		const offset = (page - 1) * limit
+		const totalPosts = await Post.countDocuments({ owner: owner._id })
+		if (totalPosts === 0) {
+			throw new ApiError(404, "Posts not found")
+		}
+		if (offset >= totalPosts) {
+			throw new ApiError(404, "No more posts to show")
+		}
+
+		const posts = await Post.aggregate([
+			...getPostAggregate(owner._id, accessingUserId),
+			{
+				$skip: offset,
+			},
+			{
+				$limit: limit,
+			},
+		])
 
 		if (!posts || posts.length === 0) {
 			throw new ApiError(404, "Posts not found")
 		}
 
-		return posts
+		return {
+			posts,
+			totalPosts,
+			totalPages: Math.ceil(totalPosts / limit),
+			currentPage: page,
+		}
 	} catch (error) {
 		console.error("Failed to get posts", error)
 		throw new ApiError(500, "Failed to get posts")

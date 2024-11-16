@@ -21,28 +21,30 @@ const getPostByIdController = asyncHandler(async (req, res) => {
 })
 
 const getPostByOwnerNameController = asyncHandler(async (req, res) => {
-	const { ownerName } = req.params
-	const posts = await getPostByOwnerName(ownerName, req.user._id)
+	let { ownerName, page, limit } = req.params
+	page = parseInt(page)
+	limit = parseInt(limit)
+	const posts = await getPostByOwnerName(ownerName, req.user._id, page, limit)
 	res.json(new ApiResponse(200, "Posts retrieved successfully", posts))
 })
 
 const editPostController = asyncHandler(async (req, res) => {
-    const { postId } = req.params
-    const { content } = req.body
-    const post = await editPost(postId, req.user._id, content)
-    res.json(new ApiResponse(200, "Post edited successfully", post))
+	const { postId } = req.params
+	const { content } = req.body
+	const post = await editPost(postId, req.user._id, content)
+	res.json(new ApiResponse(200, "Post edited successfully", post))
 })
 
 const deletePostController = asyncHandler(async (req, res) => {
-    const { postId } = req.params
-    await deletePost(postId, req.user._id)
-    res.json(new ApiResponse(200, "Post deleted successfully"))
+	const { postId } = req.params
+	await deletePost(postId, req.user._id)
+	res.json(new ApiResponse(200, "Post deleted successfully"))
 })
 
 export {
 	createPostController,
 	getPostByIdController,
 	getPostByOwnerNameController,
-    editPostController,
-    deletePostController,
+	editPostController,
+	deletePostController,
 }

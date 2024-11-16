@@ -13,7 +13,7 @@ postRouter.use(checkAuth)
 
 postRouter.post("/", createPostController)
 postRouter.get("/:postId", getPostByIdController)
-postRouter.get("/user/:ownerName", getPostByOwnerNameController)
+postRouter.get("/user/:ownerName/:page/:limit", getPostByOwnerNameController)
 postRouter.patch("/:postId", editPostController)
 postRouter.delete("/:postId", deletePostController)
 
