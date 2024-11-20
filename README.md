@@ -19,11 +19,12 @@ TumiNol-Backend is a prototype project of the backend of the famous video-sharin
 - Get channel info
 - Toggle channel subscription
 - Get subscribers list and list of subscribed channels
+- Get individual posts and posts by owner
+- Create, Update and Delete posts
 
 ### Planned Features
 - Video upload, streaming and management
 - Comment and like management
-- Post management
 - Playlist management
 
 ## Installation
@@ -88,12 +89,35 @@ Here are some of the main API endpoints:
     GET /api/v1/subscriptions/subscribers: Get the list of users subscribed to your channel
     GET /api/v1/subscriptions/subscribed: Get the list of channels you are subscribed to
     ```
-    
+
+- Post Routes:
+
+    ```http
+    POST /api/v1/posts/ - Create a new post
+    GET /api/v1/posts/:postId - Get a post by its ID
+    GET /api/v1/posts/user/:ownerName - Get posts by owner name with pagination
+    PATCH /api/v1/posts/:postId - Edit a post by its ID
+    DELETE /api/v1/posts/:postId - Delete a post by its ID
+    ```
 - Test Routes:
 
     ```http
     GET /api/v1/test: Test endpoint
     ```
+
+**Pagination:**
+
+For endpoints that support pagination, you can use the following query parameters:
+
+- _page_: The page number to retrieve (default is `1`).
+- _limit_: The number of items per page (default is `10`).
+
+**Example:**
+
+```http
+GET /api/v1/posts/user/:ownerName?page=1&limit=10
+```
+
 
 ## Environment Variables
 
