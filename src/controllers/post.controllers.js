@@ -21,7 +21,8 @@ const getPostByIdController = asyncHandler(async (req, res) => {
 })
 
 const getPostByOwnerNameController = asyncHandler(async (req, res) => {
-	let { ownerName, page, limit } = req.params
+	const { ownerName } = req.params
+	let { page = 1, limit = 10 } = req.query
 	page = parseInt(page)
 	limit = parseInt(limit)
 	const posts = await getPostByOwnerName(ownerName, req.user._id, page, limit)
