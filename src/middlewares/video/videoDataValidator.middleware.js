@@ -25,4 +25,4 @@ const videoDataValidatorMiddleware = (req, res, next) => {
 	res.send(400).json(new ApiError(400, "Invalid data", mappedErrors))
 }
 
-module.exports = { videoDataValidator, videoDataValidatorMiddleware }
+export { videoDataValidator, videoDataValidatorMiddleware }
