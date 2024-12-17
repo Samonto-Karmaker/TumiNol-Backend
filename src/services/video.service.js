@@ -1,8 +1,11 @@
-// videoData: { title, description, videoUrl, thumbnailUrl }
-const publishVideo = async (userId, videoData) => {}
+// files contains the video file and thumbnail file
+const publishVideo = async (userId, title, description, files) => {}
 
-// videoDetails: { title, description }
+// videoDetails = { title, description }
+// if one of the fields is not provided, that field should not be updated
 const updateVideoDetails = async (userId, videoId, videoDetails) => {}
+
+const updateVideoThumbnail = async (userId, videoId, thumbnail) => {}
 
 const deleteVideo = async (userId, videoId) => {}
 
@@ -19,6 +22,7 @@ const togglePublishStatus = async (userId, videoId) => {}
 module.exports = {
 	publishVideo,
 	updateVideoDetails,
+	updateVideoThumbnail,
 	deleteVideo,
 	getVideo,
 	getAllVideos,
