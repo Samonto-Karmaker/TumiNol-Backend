@@ -43,8 +43,11 @@ const uploadOnCloudinary = async (localFilePath, isVideo = false) => {
 		*/
 		const response = await cloudinary.uploader.upload(localFilePath, options)
 		console.log(`File uploaded successfully: ${response.url}`)
-		console.log(`Playback URL: ${response.playback_url}`)
-		console.log(`Eager transformations: ${JSON.stringify(response.eager)}`)
+		if (isVideo) {
+			console.log("Generated m3u8 files:")
+			console.log(response.eager)
+			console.log(`playback_url: ${response.playback_url}`)
+		}
 		return response
 	} catch (error) {
 		console.error(error)
