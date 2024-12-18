@@ -16,7 +16,7 @@ const uploadOnCloudinary = async (localFilePath, isVideo = false) => {
 		if (!localFilePath) return null
 		console.log(`Uploading file: ${localFilePath}`)
 		const options = {
-			resource_type: "auto",
+			resource_type: isVideo ? "video" : "auto",
 		}
 
 		/* 	If the file is a video, we will add the eager option to generate a m3u8 file
@@ -26,16 +26,25 @@ const uploadOnCloudinary = async (localFilePath, isVideo = false) => {
 		 	format: "m3u8" is used to generate a m3u8 file which is used for streaming videos in HTTP Live Streaming (HLS) format
 		*/
 		if (isVideo) {
-			options.resource_type = "video"
 			options.eager = [
 				{ streaming_profile: "sd", format: "m3u8" }, // sd: standard definition for low bandwidth
 				{ streaming_profile: "hd", format: "m3u8" }, // hd: high definition for medium bandwidth
 				{ streaming_profile: "full_hd", format: "m3u8" }, // full_hd: full high definition for high bandwidth
 			]
 		}
-
+		/*
+			The code does work and different streaming profiles are generated for the video
+			However, I don't see the generated m3u8 files in the Cloudinary dashboard but
+			the response object contains the generated m3u8 files
+			Now I don't know what to do with the generated m3u8 files, how to store them, and
+			what to do with them in the frontend
+			For now, I will just log the generated m3u8 files in the console and store the URL of the video
+			TODO: Find out how to store and use the generated m3u8 files in the frontend
+		*/
 		const response = await cloudinary.uploader.upload(localFilePath, options)
 		console.log(`File uploaded successfully: ${response.url}`)
+		console.log(`Playback URL: ${response.playback_url}`)
+		console.log(`Eager transformations: ${JSON.stringify(response.eager)}`)
 		return response
 	} catch (error) {
 		console.error(error)
