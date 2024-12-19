@@ -5,7 +5,10 @@ import {
 	videoDataValidator,
 	videoDataValidatorMiddleware,
 } from "../middlewares/video/videoDataValidator.middleware.js"
-import { publishVideoController } from "../controllers/video.controllers.js"
+import {
+	getVideoByIdController,
+	publishVideoController,
+} from "../controllers/video.controllers.js"
 
 const videoRouter = Router()
 
@@ -26,5 +29,7 @@ videoRouter.post(
 	videoDataValidatorMiddleware,
 	publishVideoController
 )
+
+videoRouter.route("/:videoId").get(checkAuth, getVideoByIdController)
 
 export default videoRouter
