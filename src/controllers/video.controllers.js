@@ -11,4 +11,12 @@ const publishVideoController = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(201, "Video published successfully", video))
 })
 
-export { publishVideoController }
+const getVideoByIdController = asyncHandler(async (req, res) => {
+	const videoId = req.params.videoId
+	const video = await getVideoById(videoId, req.user._id)
+	res
+		.status(200)
+		.json(new ApiResponse(200, "Video retrieved successfully", video))
+})
+
+export { publishVideoController, getVideoByIdController }
