@@ -251,7 +251,97 @@ const getVideosByUser = async (
 	limit = 10
 ) => {}
 
-const searchVideosByTitle = async searchQuery => {}
+const searchVideosByTitle = async (
+	searchQuery,
+	sortBy = VideoSortOptionsEnums.CREATED_AT,
+	sortType = VideoSortOrdersEnums.DESC,
+	page = 1,
+	limit = 10
+ ) => {
+	if (!searchQuery) {
+		throw new ApiError(400, "Search query is required")
+	}
+	if (!Object.values(VideoSortOptionsEnums).includes(sortBy)) {
+		throw new ApiError(400, "Invalid sort by option")
+	}
+	if (!Object.values(VideoSortOrdersEnums).includes(sortType)) {
+		throw new ApiError(400, "Invalid sort type option")
+	}
+	try {
+		const totalVideos = await Video.countDocuments({
+			isPublished: true,
+			title: { $regex: searchQuery, $options: "i" },
+		})
+		const videos = await Video.aggregate([
+			{
+				$match: {
+					isPublished: true,
+					title: { $regex: searchQuery, $options: "i" },
+				},
+			},
+			{
+				$lookup: {
+					from: "users",
+					localField: "owner",
+					foreignField: "_id",
+					as: "owner",
+				},
+			},
+			{
+				$unwind: "$owner",
+			},
+			{
+				$lookup: {
+					from: "likes",
+					localField: "_id",
+					foreignField: "video",
+					as: "likes",
+				},
+			},
+			{
+				$addFields: {
+					likeCount: { $size: "$likes" },
+				},
+			},
+			{
+				$project: {
+					owner: {
+						_id: 1,
+						fullName: 1,
+						avatar: 1,
+					},
+					thumbnail: 1,
+					title: 1,
+					duration: 1,
+					views: 1,
+					likeCount: 1,
+					createdAt: 1,
+				},
+			},
+			{
+				$sort: {
+					[sortBy]: sortType === VideoSortOrdersEnums.ASC ? 1 : -1,
+				},
+			},
+			{
+				$skip: (page - 1) * limit,
+			},
+			{
+				$limit: limit,
+			},
+		])
+
+		return {
+			videos,
+			totalVideos,
+			totalPages: Math.ceil(totalVideos / limit),
+			currentPage: page,
+		}
+	} catch (error) {
+		console.error("Failed to search videos by title", error)
+		throw new ApiError(500, "Failed to search videos by title")
+	}
+}
 
 const togglePublishStatus = async (userId, videoId) => {}
 
