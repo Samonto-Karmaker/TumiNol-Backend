@@ -156,6 +156,14 @@ const getAllVideos = async (
 	page = 1,
 	limit = 10
 ) => {
+	if (!Object.values(VideoSortOptionsEnums).includes(sortBy)) {
+		throw new ApiError(400, "Invalid sort by option")
+	}
+
+	if (!Object.values(VideoSortOrdersEnums).includes(sortType)) {
+		throw new ApiError(400, "Invalid sort type option")
+	}
+
 	try {
 		const videos = await Video.aggregate([
 			{
