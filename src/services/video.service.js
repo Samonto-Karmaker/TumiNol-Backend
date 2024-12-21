@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose"
+import mongoose, { get, mongo } from "mongoose"
 import { Video } from "../models/Video.js"
 import ApiError from "../utils/ApiError.js"
 import {
@@ -7,6 +7,63 @@ import {
 } from "../utils/cloudinary.js"
 import { isValidObjectId } from "../utils/validateObjectId.js"
 import { VideoSortOptionsEnums, VideoSortOrdersEnums } from "../constants.js"
+
+// Helper functions
+const getVideoAggregate = (match, sortBy, sortType, page, limit) => [
+	{
+		$match: match,
+	},
+	{
+		$lookup: {
+			from: "users",
+			localField: "owner",
+			foreignField: "_id",
+			as: "owner",
+		},
+	},
+	{
+		$unwind: "$owner",
+	},
+	{
+		$lookup: {
+			from: "likes",
+			localField: "_id",
+			foreignField: "video",
+			as: "likes",
+		},
+	},
+	{
+		$addFields: {
+			likeCount: { $size: "$likes" },
+		},
+	},
+	{
+		$project: {
+			owner: {
+				_id: 1,
+				fullName: 1,
+				avatar: 1,
+			},
+			thumbnail: 1,
+			title: 1,
+			duration: 1,
+			views: 1,
+			likeCount: 1,
+			createdAt: 1,
+		},
+	},
+	{
+		$sort: {
+			[sortBy]: sortType === VideoSortOrdersEnums.ASC ? 1 : -1,
+		},
+	},
+	{
+		$skip: (page - 1) * limit,
+	},
+	{
+		$limit: limit,
+	},
+]
 
 // files contains the video file and thumbnail file
 const publishVideo = async (userId, title, description, files) => {
@@ -164,65 +221,15 @@ const getAllVideos = async (
 		throw new ApiError(400, "Invalid sort type option")
 	}
 
+	const constrains = {
+		isPublished: true,
+	}
+
 	try {
-		const totalVideos = await Video.countDocuments({ isPublished: true })
-		const videos = await Video.aggregate([
-			{
-				$match: {
-					isPublished: true,
-				},
-			},
-			{
-				$lookup: {
-					from: "users",
-					localField: "owner",
-					foreignField: "_id",
-					as: "owner",
-				},
-			},
-			{
-				$unwind: "$owner",
-			},
-			{
-				$lookup: {
-					from: "likes",
-					localField: "_id",
-					foreignField: "video",
-					as: "likes",
-				},
-			},
-			{
-				$addFields: {
-					likeCount: { $size: "$likes" },
-				},
-			},
-			{
-				$project: {
-					owner: {
-						_id: 1,
-						fullName: 1,
-						avatar: 1,
-					},
-					thumbnail: 1,
-					title: 1,
-					duration: 1,
-					views: 1,
-					likeCount: 1,
-					createdAt: 1,
-				},
-			},
-			{
-				$sort: {
-					[sortBy]: sortType === VideoSortOrdersEnums.ASC ? 1 : -1,
-				},
-			},
-			{
-				$skip: (page - 1) * limit,
-			},
-			{
-				$limit: limit,
-			},
-		])
+		const totalVideos = await Video.countDocuments(constrains)
+		const videos = await Video.aggregate(
+			getVideoAggregate(constrains, sortBy, sortType, page, limit)
+		)
 
 		return {
 			videos,
@@ -257,7 +264,7 @@ const searchVideosByTitle = async (
 	sortType = VideoSortOrdersEnums.DESC,
 	page = 1,
 	limit = 10
- ) => {
+) => {
 	if (!searchQuery) {
 		throw new ApiError(400, "Search query is required")
 	}
@@ -267,69 +274,17 @@ const searchVideosByTitle = async (
 	if (!Object.values(VideoSortOrdersEnums).includes(sortType)) {
 		throw new ApiError(400, "Invalid sort type option")
 	}
+
+	const constrains = {
+		isPublished: true,
+		title: { $regex: searchQuery, $options: "i" },
+	}
+
 	try {
-		const totalVideos = await Video.countDocuments({
-			isPublished: true,
-			title: { $regex: searchQuery, $options: "i" },
-		})
-		const videos = await Video.aggregate([
-			{
-				$match: {
-					isPublished: true,
-					title: { $regex: searchQuery, $options: "i" },
-				},
-			},
-			{
-				$lookup: {
-					from: "users",
-					localField: "owner",
-					foreignField: "_id",
-					as: "owner",
-				},
-			},
-			{
-				$unwind: "$owner",
-			},
-			{
-				$lookup: {
-					from: "likes",
-					localField: "_id",
-					foreignField: "video",
-					as: "likes",
-				},
-			},
-			{
-				$addFields: {
-					likeCount: { $size: "$likes" },
-				},
-			},
-			{
-				$project: {
-					owner: {
-						_id: 1,
-						fullName: 1,
-						avatar: 1,
-					},
-					thumbnail: 1,
-					title: 1,
-					duration: 1,
-					views: 1,
-					likeCount: 1,
-					createdAt: 1,
-				},
-			},
-			{
-				$sort: {
-					[sortBy]: sortType === VideoSortOrdersEnums.ASC ? 1 : -1,
-				},
-			},
-			{
-				$skip: (page - 1) * limit,
-			},
-			{
-				$limit: limit,
-			},
-		])
+		const totalVideos = await Video.countDocuments(constrains)
+		const videos = await Video.aggregate(
+			getVideoAggregate(constrains, sortBy, sortType, page, limit)
+		)
 
 		return {
 			videos,
