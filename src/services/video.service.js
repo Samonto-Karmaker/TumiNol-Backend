@@ -151,8 +151,15 @@ const getVideoById = async (videoId, accessingUserId) => {
 
 const getAllVideos = async (sortBy, sortType, page = 1, limit = 10) => {}
 
+/* 	
+	ownerId is the user ID of the owner of the videos
+	accessingUserId is the user ID of the user accessing the videos
+	if accessingUserId is the same as ownerId, return all videos
+	else return only published videos
+*/
 const getVideosByUser = async (
-	userId,
+	ownerId,
+	accessingUserId,
 	sortBy,
 	sortType,
 	page = 1,
