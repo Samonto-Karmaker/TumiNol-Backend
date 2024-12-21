@@ -9,6 +9,7 @@ import {
 	getAllVideosController,
 	getVideoByIdController,
 	publishVideoController,
+	searchVideosByTitleController,
 } from "../controllers/video.controllers.js"
 
 const videoRouter = Router()
@@ -35,5 +36,6 @@ videoRouter
 	.get(getAllVideosController)
 
 videoRouter.route("/:videoId").get(getVideoByIdController)
+videoRouter.route("/search").get(searchVideosByTitleController)
 
 export default videoRouter
