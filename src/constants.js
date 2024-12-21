@@ -9,15 +9,21 @@ const DB_NAME = "tuminol"
 const API_URL = "/api/v1"
 
 const VideoSortOptionsEnums = Object.freeze({
-    CREATED_AT: "createdAt",
-    VIEWS: "views",
-    LIKES: "likes",
-    DURATION: "duration",
+	CREATED_AT: "createdAt",
+	VIEWS: "views",
+	LIKES: "likeCount",
+	DURATION: "duration",
 })
 
 const VideoSortOrdersEnums = Object.freeze({
-    ASC: "asc",
-    DESC: "desc",
+	ASC: "asc",
+	DESC: "desc",
 })
 
-export { DB_NAME, API_URL, TEMP_DIR, VideoSortOptionsEnums, VideoSortOrdersEnums }
+export {
+	DB_NAME,
+	API_URL,
+	TEMP_DIR,
+	VideoSortOptionsEnums,
+	VideoSortOrdersEnums,
+}
