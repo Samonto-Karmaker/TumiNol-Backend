@@ -6,6 +6,7 @@ import {
 	uploadOnCloudinary,
 } from "../utils/cloudinary.js"
 import { isValidObjectId } from "../utils/validateObjectId.js"
+import { VideoSortOptionsEnums, VideoSortOrdersEnums } from "../constants.js"
 
 // files contains the video file and thumbnail file
 const publishVideo = async (userId, title, description, files) => {
@@ -149,7 +150,12 @@ const getVideoById = async (videoId, accessingUserId) => {
 	return videoWithMetaData[0]
 }
 
-const getAllVideos = async (sortBy, sortType, page = 1, limit = 10) => {}
+const getAllVideos = async (
+	sortBy = VideoSortOptionsEnums.CREATED_AT,
+	sortType = VideoSortOrdersEnums.DESC,
+	page = 1,
+	limit = 10
+) => {}
 
 /* 	
 	ownerId is the user ID of the owner of the videos
@@ -160,8 +166,8 @@ const getAllVideos = async (sortBy, sortType, page = 1, limit = 10) => {}
 const getVideosByUser = async (
 	ownerId,
 	accessingUserId,
-	sortBy,
-	sortType,
+	sortBy = VideoSortOptionsEnums.CREATED_AT,
+	sortType = VideoSortOrdersEnums.DESC,
 	page = 1,
 	limit = 10
 ) => {}
