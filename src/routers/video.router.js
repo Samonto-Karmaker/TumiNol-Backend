@@ -13,7 +13,7 @@ import {
 const videoRouter = Router()
 
 videoRouter.post(
-	"/publish",
+	"/",
 	checkAuth,
 	upload.fields([
 		{
