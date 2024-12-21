@@ -155,7 +155,77 @@ const getAllVideos = async (
 	sortType = VideoSortOrdersEnums.DESC,
 	page = 1,
 	limit = 10
-) => {}
+) => {
+	try {
+		const videos = await Video.aggregate([
+			{
+				$match: {
+					isPublished: true,
+				},
+			},
+			{
+				$lookup: {
+					from: "users",
+					localField: "owner",
+					foreignField: "_id",
+					as: "owner",
+				},
+			},
+			{
+				$unwind: "$owner",
+			},
+			{
+				$lookup: {
+					from: "likes",
+					localField: "_id",
+					foreignField: "video",
+					as: "likes",
+				},
+			},
+			{
+				$addFields: {
+					likeCount: { $size: "$likes" },
+				},
+			},
+			{
+				$project: {
+					owner: {
+						_id: 1,
+						fullName: 1,
+						avatar: 1,
+					},
+					thumbnail: 1,
+					title: 1,
+					duration: 1,
+					views: 1,
+					likeCount: 1,
+					createdAt: 1,
+				},
+			},
+			{
+				$sort: {
+					[sortBy]: sortType === VideoSortOrdersEnums.ASC ? 1 : -1,
+				},
+			},
+			{
+				$skip: (page - 1) * limit,
+			},
+			{
+				$limit: limit,
+			}
+		])
+
+		return {
+			videos,
+			totalVideos: videos.length,
+			totalPages: Math.ceil(videos.length / limit),
+			currentPage: page,
+		}
+	} catch (error) {
+		console.error("Failed to get all videos", error)
+		throw new ApiError(500, "Failed to get all videos")
+	}
+}
 
 /* 	
 	ownerId is the user ID of the owner of the videos
