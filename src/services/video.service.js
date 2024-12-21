@@ -1,3 +1,4 @@
+import mongoose, { mongo } from "mongoose"
 import { Video } from "../models/Video.js"
 import ApiError from "../utils/ApiError.js"
 import {
@@ -78,7 +79,7 @@ const getVideoById = async (videoId, accessingUserId) => {
 		videoWithMetaData = await Video.aggregate([
 			{
 				$match: {
-					_id: videoId,
+					_id: new mongoose.Types.ObjectId(videoId),
 					isPublished: true,
 				},
 			},

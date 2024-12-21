@@ -1,6 +1,6 @@
 import asyncHandler from "../utils/asyncHandler.js"
 import ApiResponse from "../utils/ApiResponse.js"
-import { publishVideo } from "../services/video.service.js"
+import { publishVideo, getVideoById } from "../services/video.service.js"
 
 const publishVideoController = asyncHandler(async (req, res) => {
 	const { title, description } = req.body
