@@ -6,6 +6,7 @@ import {
 	videoDataValidatorMiddleware,
 } from "../middlewares/video/videoDataValidator.middleware.js"
 import {
+	getAllVideosController,
 	getVideoByIdController,
 	publishVideoController,
 } from "../controllers/video.controllers.js"
@@ -14,21 +15,24 @@ const videoRouter = Router()
 
 videoRouter.use(checkAuth)
 
-videoRouter.route("/").post(
-	upload.fields([
-		{
-			name: "video",
-			maxCount: 1,
-		},
-		{
-			name: "thumbnail",
-			maxCount: 1,
-		},
-	]),
-	videoDataValidator,
-	videoDataValidatorMiddleware,
-	publishVideoController
-)
+videoRouter
+	.route("/")
+	.post(
+		upload.fields([
+			{
+				name: "video",
+				maxCount: 1,
+			},
+			{
+				name: "thumbnail",
+				maxCount: 1,
+			},
+		]),
+		videoDataValidator,
+		videoDataValidatorMiddleware,
+		publishVideoController
+	)
+	.get(getAllVideosController)
 
 videoRouter.route("/:videoId").get(getVideoByIdController)
 

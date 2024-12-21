@@ -35,4 +35,4 @@ const getAllVideosController = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "Videos retrieved successfully", videos))
 })
 
-export { publishVideoController, getVideoByIdController }
+export { publishVideoController, getVideoByIdController, getAllVideosController }
