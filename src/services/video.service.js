@@ -165,6 +165,7 @@ const getAllVideos = async (
 	}
 
 	try {
+		const totalVideos = await Video.countDocuments({ isPublished: true })
 		const videos = await Video.aggregate([
 			{
 				$match: {
@@ -220,13 +221,13 @@ const getAllVideos = async (
 			},
 			{
 				$limit: limit,
-			}
+			},
 		])
 
 		return {
 			videos,
-			totalVideos: videos.length,
-			totalPages: Math.ceil(videos.length / limit),
+			totalVideos,
+			totalPages: Math.ceil(totalVideos / limit),
 			currentPage: page,
 		}
 	} catch (error) {
