@@ -12,9 +12,9 @@ import {
 
 const videoRouter = Router()
 
-videoRouter.post(
-	"/",
-	checkAuth,
+videoRouter.use(checkAuth)
+
+videoRouter.route("/").post(
 	upload.fields([
 		{
 			name: "video",
@@ -30,6 +30,6 @@ videoRouter.post(
 	publishVideoController
 )
 
-videoRouter.route("/:videoId").get(checkAuth, getVideoByIdController)
+videoRouter.route("/:videoId").get(getVideoByIdController)
 
 export default videoRouter
