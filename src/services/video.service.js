@@ -69,9 +69,9 @@ const getVideoById = async (videoId, accessingUserId) => {
 	if (!videoId || !isValidObjectId(videoId)) {
 		throw new ApiError(400, "A valid video ID is required")
 	}
-    if (!accessingUserId) {
-        throw new ApiError(400, "Accessing user ID is required")
-    }
+	if (!accessingUserId) {
+		throw new ApiError(400, "Accessing user ID is required")
+	}
 
 	let videoWithMetaData
 	try {
@@ -137,6 +137,14 @@ const getVideoById = async (videoId, accessingUserId) => {
 		console.warn(`Video not found with id: ${videoId}`)
 		throw new ApiError(404, "Video not found")
 	}
+
+	try {
+		await Video.updateOne({ _id: videoId }, { $inc: { views: 1 } })
+	} catch (error) {
+		console.error("Failed to update video views", error)
+		throw new ApiError(500, "Failed to update video views")
+	}
+
 	return videoWithMetaData[0]
 }
 
