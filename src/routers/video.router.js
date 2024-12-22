@@ -35,7 +35,7 @@ videoRouter
 	)
 	.get(getAllVideosController)
 
-videoRouter.route("/:videoId").get(getVideoByIdController)
 videoRouter.route("/search").get(searchVideosByTitleController)
+videoRouter.route("/:videoId").get(getVideoByIdController)
 
 export default videoRouter
