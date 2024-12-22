@@ -5,6 +5,7 @@ import {
 	getVideoById,
 	getAllVideos,
 	searchVideosByTitle,
+	getVideosByOwnerId,
 } from "../services/video.service.js"
 import { VideoSortOptionsEnums, VideoSortOrdersEnums } from "../constants.js"
 
@@ -62,9 +63,36 @@ const searchVideosByTitleController = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "Videos retrieved successfully", videos))
 })
 
+const getVideosByOwnerIdController = asyncHandler(async (req, res) => {
+	const ownerId = req.params.ownerId
+	const accessingUserId = req.user._id
+	let {
+		sortBy = VideoSortOptionsEnums.CREATED_AT,
+		sortType = VideoSortOrdersEnums.DESC,
+		page = 1,
+		limit = 10,
+	} = req.query
+	page = parseInt(page)
+	limit = parseInt(limit)
+
+	const videos = await getVideosByOwnerId(
+		ownerId,
+		accessingUserId,
+		sortBy,
+		sortType,
+		page,
+		limit
+	)
+
+	res
+		.status(200)
+		.json(new ApiResponse(200, "Videos retrieved successfully", videos))
+})
+
 export {
 	publishVideoController,
 	getVideoByIdController,
 	getAllVideosController,
 	searchVideosByTitleController,
+	getVideosByOwnerIdController,
 }
