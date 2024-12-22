@@ -7,6 +7,7 @@ import {
 } from "../utils/cloudinary.js"
 import { isValidObjectId } from "../utils/validateObjectId.js"
 import { VideoSortOptionsEnums, VideoSortOrdersEnums } from "../constants.js"
+import { User } from "../models/User.js"
 
 // Helper functions
 const getVideoAggregate = (match, sortBy, sortType, page, limit) => [
@@ -270,15 +271,20 @@ const getVideosByOwnerId = async (
 		throw new ApiError(400, "Invalid sort type option")
 	}
 
-	const constrains = {
-		owner: new mongoose.Types.ObjectId(ownerId),
-	}
-
-	if (ownerId !== accessingUserId) {
-		constrains.isPublished = true
-	}
-
 	try {
+		const owner = await User.findById(ownerId).select("_id")
+		if (!owner) {
+			console.warn(`User not found with id: ${ownerId}`)
+			throw new ApiError(404, "User not found")
+		}
+
+		const constrains = {
+			owner: owner._id
+		}
+		if (owner._id.toString() !== accessingUserId.toString()) {
+			constrains.isPublished = true
+		}
+
 		const totalVideos = await Video.countDocuments(constrains)
 		const videos = await Video.aggregate(
 			getVideoAggregate(constrains, sortBy, sortType, page, limit)
