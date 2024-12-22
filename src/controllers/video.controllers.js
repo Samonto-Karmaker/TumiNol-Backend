@@ -66,23 +66,7 @@ const searchVideosByTitleController = asyncHandler(async (req, res) => {
 const getVideosByOwnerIdController = asyncHandler(async (req, res) => {
 	const ownerId = req.params.ownerId
 	const accessingUserId = req.user._id
-	let {
-		sortBy = VideoSortOptionsEnums.CREATED_AT,
-		sortType = VideoSortOrdersEnums.DESC,
-		page = 1,
-		limit = 10,
-	} = req.query
-	page = parseInt(page)
-	limit = parseInt(limit)
-
-	const videos = await getVideosByOwnerId(
-		ownerId,
-		accessingUserId,
-		sortBy,
-		sortType,
-		page,
-		limit
-	)
+	const videos = await getVideosByOwnerId(ownerId, accessingUserId)
 
 	res
 		.status(200)
