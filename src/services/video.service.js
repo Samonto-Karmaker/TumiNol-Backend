@@ -249,14 +249,52 @@ const getAllVideos = async (
 	if accessingUserId is the same as ownerId, return all videos
 	else return only published videos
 */
-const getVideosByUser = async (
+const getVideosByOwnerId = async (
 	ownerId,
 	accessingUserId,
 	sortBy = VideoSortOptionsEnums.CREATED_AT,
 	sortType = VideoSortOrdersEnums.DESC,
 	page = 1,
 	limit = 10
-) => {}
+) => {
+	if (!ownerId || !isValidObjectId(ownerId)) {
+		throw new ApiError(400, "A valid owner ID is required")
+	}
+	if (!accessingUserId) {
+		throw new ApiError(400, "Accessing user ID is required")
+	}
+	if (!Object.values(VideoSortOptionsEnums).includes(sortBy)) {
+		throw new ApiError(400, "Invalid sort by option")
+	}
+	if (!Object.values(VideoSortOrdersEnums).includes(sortType)) {
+		throw new ApiError(400, "Invalid sort type option")
+	}
+
+	const constrains = {
+		owner: new mongoose.Types.ObjectId(ownerId),
+	}
+
+	if (ownerId !== accessingUserId) {
+		constrains.isPublished = true
+	}
+
+	try {
+		const totalVideos = await Video.countDocuments(constrains)
+		const videos = await Video.aggregate(
+			getVideoAggregate(constrains, sortBy, sortType, page, limit)
+		)
+
+		return {
+			videos,
+			totalVideos,
+			totalPages: Math.ceil(totalVideos / limit),
+			currentPage: page,
+		}
+	} catch (error) {
+		console.error("Failed to get videos by user", error)
+		throw new ApiError(500, "Failed to get videos by user")
+	}
+}
 
 const searchVideosByTitle = async (
 	searchQuery,
@@ -307,7 +345,7 @@ export {
 	deleteVideo,
 	getVideoById,
 	getAllVideos,
-	getVideosByUser,
+	getVideosByOwnerId,
 	searchVideosByTitle,
 	togglePublishStatus,
 }
