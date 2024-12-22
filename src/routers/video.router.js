@@ -8,6 +8,7 @@ import {
 import {
 	getAllVideosController,
 	getVideoByIdController,
+	getVideosByOwnerIdController,
 	publishVideoController,
 	searchVideosByTitleController,
 } from "../controllers/video.controllers.js"
@@ -36,6 +37,7 @@ videoRouter
 	.get(getAllVideosController)
 
 videoRouter.route("/search").get(searchVideosByTitleController)
+videoRouter.route("/channel/:ownerId").get(getVideosByOwnerIdController)
 videoRouter.route("/:videoId").get(getVideoByIdController)
 
 export default videoRouter
