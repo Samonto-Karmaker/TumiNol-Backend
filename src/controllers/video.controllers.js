@@ -7,6 +7,7 @@ import {
 	searchVideosByTitle,
 	getVideosByOwnerId,
 	togglePublishStatus,
+	updateVideoDetails,
 } from "../services/video.service.js"
 import { VideoSortOptionsEnums, VideoSortOrdersEnums } from "../constants.js"
 
@@ -82,6 +83,15 @@ const togglePublishStatusController = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "Video publish status toggled", video))
 })
 
+const updateVideoDetailsController = asyncHandler(async (req, res) => {
+	const videoId = req.params.videoId
+	const updatedDetails = req.body
+	const video = await updateVideoDetails(req.user._id, videoId, updatedDetails)
+	res
+		.status(200)
+		.json(new ApiResponse(200, "Video details updated successfully", video))
+})
+
 export {
 	publishVideoController,
 	getVideoByIdController,
@@ -89,4 +99,5 @@ export {
 	searchVideosByTitleController,
 	getVideosByOwnerIdController,
 	togglePublishStatusController,
+	updateVideoDetailsController,
 }
