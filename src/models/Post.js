@@ -1,4 +1,5 @@
 import mongoose from "mongoose"
+import { Like } from "./Like.js"
 
 const postSchema = new mongoose.Schema(
 	{
@@ -18,5 +19,12 @@ const postSchema = new mongoose.Schema(
 		timestamps: true,
 	}
 )
+
+// Cascade delete likes when a post is deleted
+postSchema.pre("findOneAndDelete", async function (next) {
+	const postId = this.getQuery()["_id"]
+	await Like.deleteMany({ post: postId })
+	next()
+})
 
 export const Post = mongoose.model("Post", postSchema)
