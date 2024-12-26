@@ -348,7 +348,30 @@ const searchVideosByTitle = async (
 	}
 }
 
-const togglePublishStatus = async (userId, videoId) => {}
+const togglePublishStatus = async (userId, videoId) => {
+	if (!videoId || !isValidObjectId(videoId)) {
+		throw new ApiError(400, "A valid video ID is required")
+	}
+
+	try {
+		const video = await Video.findById(videoId)
+		if (!video) {
+			console.warn(`Video not found with id: ${videoId}`)
+			throw new ApiError(404, "Video not found")
+		}
+
+		if (video.owner.toString() !== userId.toString()) {
+			throw new ApiError(403, "You are not allowed to update this video")
+		}
+
+		video.isPublished = !video.isPublished
+		await video.save()
+		return video
+	} catch (error) {
+		console.error("Failed to toggle publish status", error)
+		throw new ApiError(500, "Failed to toggle publish status")
+	}
+}
 
 export {
 	publishVideo,
