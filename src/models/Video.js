@@ -54,7 +54,7 @@ const videoSchema = new mongoose.Schema(
 // Cascade delete likes, comments, watchHistory, and playlist videos when a video is deleted
 videoSchema.pre("findOneAndDelete", async function (next) {
 	const videoId = this.getQuery()["_id"]
-	Promise.all([
+	await Promise.all([
 		Like.deleteMany({ video: videoId }),
 		Comment.deleteMany({ video: videoId }),
 		User.updateMany(

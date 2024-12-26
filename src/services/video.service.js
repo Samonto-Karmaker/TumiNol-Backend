@@ -199,7 +199,13 @@ const getVideoById = async (videoId, accessingUserId) => {
 	}
 
 	try {
-		await Video.updateOne({ _id: videoId }, { $inc: { views: 1 } })
+		await Promise.all([
+			Video.updateOne({ _id: videoId }, { $inc: { views: 1 } }),
+			User.updateOne(
+				{ _id: accessingUserId },
+				{ $addToSet: { watchHistory: videoId } }
+			),
+		])
 	} catch (error) {
 		console.error("Failed to update video views", error)
 		throw new ApiError(500, "Failed to update video views")
@@ -279,7 +285,7 @@ const getVideosByOwnerId = async (
 		}
 
 		const constrains = {
-			owner: owner._id
+			owner: owner._id,
 		}
 		if (owner._id.toString() !== accessingUserId.toString()) {
 			constrains.isPublished = true
