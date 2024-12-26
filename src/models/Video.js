@@ -1,5 +1,9 @@
 import mongoose from "mongoose"
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
+import { Like } from "./Like.js"
+import { Comment } from "./Comment.js"
+import { User } from "./User.js"
+import { Playlist } from "./Playlist.js"
 
 const videoSchema = new mongoose.Schema(
 	{
@@ -46,6 +50,21 @@ const videoSchema = new mongoose.Schema(
 		timestamps: true,
 	}
 )
+
+// Cascade delete likes, comments, watchHistory, and playlist videos when a video is deleted
+videoSchema.pre("findOneAndDelete", async function (next) {
+	const videoId = this.getQuery()["_id"]
+	Promise.all([
+		Like.deleteMany({ video: videoId }),
+		Comment.deleteMany({ video: videoId }),
+		User.updateMany(
+			{ watchHistory: videoId },
+			{ $pull: { watchHistory: videoId } }
+		),
+		Playlist.updateMany({ videos: videoId }, { $pull: { videos: videoId } }),
+	])
+	next()
+})
 
 videoSchema.plugin(mongooseAggregatePaginate)
 
