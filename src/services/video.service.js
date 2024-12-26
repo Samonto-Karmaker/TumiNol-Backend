@@ -366,7 +366,10 @@ const togglePublishStatus = async (userId, videoId) => {
 
 		video.isPublished = !video.isPublished
 		await video.save()
-		return video
+		return {
+			_id: video._id,
+			isPublished: video.isPublished,
+		}
 	} catch (error) {
 		console.error("Failed to toggle publish status", error)
 		throw new ApiError(500, "Failed to toggle publish status")
