@@ -11,6 +11,7 @@ import {
 	getVideosByOwnerIdController,
 	publishVideoController,
 	searchVideosByTitleController,
+	togglePublishStatusController,
 } from "../controllers/video.controllers.js"
 
 const videoRouter = Router()
@@ -39,5 +40,7 @@ videoRouter
 videoRouter.route("/search").get(searchVideosByTitleController)
 videoRouter.route("/channel/:ownerId").get(getVideosByOwnerIdController)
 videoRouter.route("/:videoId").get(getVideoByIdController)
+
+videoRouter.route("/publish/:videoId").patch(togglePublishStatusController)
 
 export default videoRouter
