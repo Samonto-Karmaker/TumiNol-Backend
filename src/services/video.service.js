@@ -119,7 +119,57 @@ const publishVideo = async (userId, title, description, files) => {
 
 // videoDetails = { title, description }
 // if one of the fields is not provided, that field should not be updated
-const updateVideoDetails = async (userId, videoId, videoDetails) => {}
+const updateVideoDetails = async (userId, videoId, videoDetails) => {
+	if (!videoId || !isValidObjectId(videoId)) {
+		throw new ApiError(400, "A valid video ID is required")
+	}
+	if (!videoDetails || Object.keys(videoDetails).length === 0) {
+		throw new ApiError(400, "Video details are required")
+	}
+
+	try {
+		const video = await Video.findById(videoId)
+		if (!video) {
+			console.warn(`Video not found with id: ${videoId}`)
+			throw new ApiError(404, "Video not found")
+		}
+		if (video.owner.toString() !== userId.toString()) {
+			throw new ApiError(403, "You are not allowed to update this video")
+		}
+
+		const updatedFields = {}
+		if (videoDetails.title?.trim() !== "") {
+			updatedFields.title = videoDetails.title
+		}
+		if (videoDetails.description?.trim() !== "") {
+			updatedFields.description = videoDetails.description
+		}
+		if (Object.keys(updatedFields).length === 0) {
+			throw new ApiError(400, "No valid fields to update")
+		}
+
+		const updatedVideo = await Video.findByIdAndUpdate(
+			videoId,
+			{
+				$set: updatedFields,
+			},
+			{
+				new: true,
+				runValidators: true,
+			}
+		).select("_id title description")
+
+		if (!updatedVideo) {
+			console.warn(`Video not found with id: ${videoId}`)
+			throw new ApiError(404, "Video not found")
+		}
+
+		return updatedVideo
+	} catch (error) {
+		console.error("Failed to update video details", error)
+		throw new ApiError(500, "Failed to update video details")
+	}
+}
 
 const updateVideoThumbnail = async (userId, videoId, thumbnail) => {}
 
