@@ -8,6 +8,7 @@ import {
 	getVideosByOwnerId,
 	togglePublishStatus,
 	updateVideoDetails,
+	updateVideoThumbnail,
 } from "../services/video.service.js"
 import { VideoSortOptionsEnums, VideoSortOrdersEnums } from "../constants.js"
 
@@ -92,6 +93,15 @@ const updateVideoDetailsController = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "Video details updated successfully", video))
 })
 
+const updateVideoThumbnailController = asyncHandler(async (req, res) => {
+	const videoId = req.params.videoId
+	const thumbnail = req.file
+	const video = await updateVideoThumbnail(req.user._id, videoId, thumbnail)
+	res
+		.status(200)
+		.json(new ApiResponse(200, "Video thumbnail updated successfully", video))
+})
+
 export {
 	publishVideoController,
 	getVideoByIdController,
@@ -100,4 +110,5 @@ export {
 	getVideosByOwnerIdController,
 	togglePublishStatusController,
 	updateVideoDetailsController,
+	updateVideoThumbnailController,
 }
