@@ -9,6 +9,7 @@ import {
 	togglePublishStatus,
 	updateVideoDetails,
 	updateVideoThumbnail,
+	deleteVideo,
 } from "../services/video.service.js"
 import { VideoSortOptionsEnums, VideoSortOrdersEnums } from "../constants.js"
 
@@ -102,6 +103,12 @@ const updateVideoThumbnailController = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "Video thumbnail updated successfully", video))
 })
 
+const deleteVideoController = asyncHandler(async (req, res) => {
+	const videoId = req.params.videoId
+	await deleteVideo(req.user._id, videoId)
+	res.status(204).json(new ApiResponse(204, "Video deleted successfully"))
+})
+
 export {
 	publishVideoController,
 	getVideoByIdController,
@@ -111,4 +118,5 @@ export {
 	togglePublishStatusController,
 	updateVideoDetailsController,
 	updateVideoThumbnailController,
+	deleteVideoController,
 }
