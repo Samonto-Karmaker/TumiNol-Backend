@@ -227,7 +227,35 @@ const updateVideoThumbnail = async (userId, videoId, file) => {
 	}
 }
 
-const deleteVideo = async (userId, videoId) => {}
+const deleteVideo = async (userId, videoId) => {
+	if (!videoId || !isValidObjectId(videoId)) {
+		throw new ApiError(400, "A valid video ID is required")
+	}
+
+	try {
+		const video = await Video.findById(videoId)
+		if (!video) {
+			console.warn(`Video not found with id: ${videoId}`)
+			throw new ApiError(404, "Video not found")
+		}
+		if (video.owner.toString() !== userId.toString()) {
+			throw new ApiError(403, "You are not allowed to delete this video")
+		}
+
+		const videoPublicId = extractPublicId(video.videoFile)
+		const thumbnailPublicId = extractPublicId(video.thumbnail)
+		await Promise.all([
+			Video.findByIdAndDelete(videoId),
+			deleteFromCloudinary(videoPublicId),
+			deleteFromCloudinary(thumbnailPublicId),
+		])
+
+		console.log(`Video deleted with id: ${videoId}`)
+	} catch (error) {
+		console.error("Failed to delete video", error)
+		throw new ApiError(500, "Failed to delete video")
+	}
+}
 
 const getVideoById = async (videoId, accessingUserId) => {
 	if (!videoId || !isValidObjectId(videoId)) {
