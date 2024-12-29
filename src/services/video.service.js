@@ -8,6 +8,7 @@ import {
 import { isValidObjectId } from "../utils/validateObjectId.js"
 import { VideoSortOptionsEnums, VideoSortOrdersEnums } from "../constants.js"
 import { User } from "../models/User.js"
+import { extractPublicId } from "cloudinary-build-url"
 
 // Helper functions
 const getVideoAggregate = (match, sortBy, sortType, page, limit) => [
@@ -171,7 +172,60 @@ const updateVideoDetails = async (userId, videoId, videoDetails) => {
 	}
 }
 
-const updateVideoThumbnail = async (userId, videoId, thumbnail) => {}
+const updateVideoThumbnail = async (userId, videoId, file) => {
+	if (!videoId || !isValidObjectId(videoId)) {
+		throw new ApiError(400, "A valid video ID is required")
+	}
+
+	// As this is a single file upload, file is the thumbnail file
+	const thumbnailFilePath = file?.path
+	if (!thumbnailFilePath) {
+		throw new ApiError(400, "Thumbnail file is required")
+	}
+
+	const thumbnail = await uploadOnCloudinary(thumbnailFilePath)
+	if (!thumbnail?.url) {
+		throw new ApiError(500, "Failed to upload thumbnail")
+	}
+
+	try {
+		const video = await Video.findById(videoId)
+		if (!video) {
+			console.warn(`Video not found with id: ${videoId}`)
+			throw new ApiError(404, "Video not found")
+		}
+		if (video.owner.toString() !== userId.toString()) {
+			throw new ApiError(403, "You are not allowed to update this video")
+		}
+
+		const oldThumbnailPublicId = extractPublicId(video.thumbnail)
+
+		const updatedVideo = await Video.findByIdAndUpdate(
+			videoId,
+			{
+				$set: { thumbnail: thumbnail.url },
+			},
+			{
+				new: true,
+				runValidators: true,
+			}
+		).select("_id thumbnail")
+
+		if (!updatedVideo) {
+			console.warn(`Video not found with id: ${videoId}`)
+			throw new ApiError(404, "Video not found")
+		}
+
+		if (oldThumbnailPublicId) {
+			await deleteFromCloudinary(oldThumbnailPublicId)
+		}
+
+		return updatedVideo
+	} catch (error) {
+		console.error("Failed to update video thumbnail", error)
+		throw new ApiError(500, "Failed to update video thumbnail")
+	}
+}
 
 const deleteVideo = async (userId, videoId) => {}
 
