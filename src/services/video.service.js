@@ -246,7 +246,7 @@ const deleteVideo = async (userId, videoId) => {
 		const thumbnailPublicId = extractPublicId(video.thumbnail)
 		await Promise.all([
 			Video.findByIdAndDelete(videoId),
-			deleteFromCloudinary(videoPublicId),
+			deleteFromCloudinary(videoPublicId, "video"),
 			deleteFromCloudinary(thumbnailPublicId),
 		])
 
