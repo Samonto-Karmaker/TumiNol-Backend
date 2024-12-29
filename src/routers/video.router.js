@@ -6,6 +6,7 @@ import {
 	videoDataValidatorMiddleware,
 } from "../middlewares/video/videoDataValidator.middleware.js"
 import {
+	deleteVideoController,
 	getAllVideosController,
 	getVideoByIdController,
 	getVideosByOwnerIdController,
@@ -41,7 +42,10 @@ videoRouter
 
 videoRouter.route("/search").get(searchVideosByTitleController)
 videoRouter.route("/channel/:ownerId").get(getVideosByOwnerIdController)
-videoRouter.route("/:videoId").get(getVideoByIdController)
+videoRouter
+	.route("/:videoId")
+	.get(getVideoByIdController)
+	.delete(deleteVideoController)
 
 videoRouter.route("/publish/:videoId").patch(togglePublishStatusController)
 videoRouter
