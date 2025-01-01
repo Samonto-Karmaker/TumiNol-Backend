@@ -19,11 +19,14 @@ TumiNol-Backend is a prototype project of the backend of the famous video-sharin
 - Get channel info
 - Toggle channel subscription
 - Get subscribers list and list of subscribed channels
-- Get individual posts and posts by owner
-- Create, Update and Delete posts
+- Get individual posts and posts by owner with pagination
+- Create, update, and delete posts
+- Video upload and streaming
+- Update thumbnail
+- Get individual, all and owner videos with sorting and pagination
+- Search, update, delete, and manage videos
 
 ### Planned Features
-- Video upload, streaming and management
 - Comment and like management
 - Playlist management
 
@@ -99,23 +102,46 @@ Here are some of the main API endpoints:
     PATCH /api/v1/posts/:postId - Edit a post by its ID
     DELETE /api/v1/posts/:postId - Delete a post by its ID
     ```
+
+- Video Routes:
+
+    ```http
+    POST /api/v1/videos/ - Upload a new video
+    GET /api/v1/videos/ - Get all videos with sorting and pagination
+    GET /api/v1/videos/search - Search videos by title with sorting and pagination
+    GET /api/v1/videos/channel/:ownerId - Get videos by owner ID with sorting and pagination
+    GET /api/v1/videos/:videoId - Get a video by its ID
+    DELETE /api/v1/videos/:videoId - Delete a video by its ID
+    PATCH /api/v1/videos/publish/:videoId - Toggle publish status of a video
+    PATCH /api/v1/videos/update-details/:videoId - Update video details
+    PATCH /api/v1/videos/update-thumbnail/:videoId - Update video thumbnail
+    ```
+
 - Test Routes:
 
     ```http
     GET /api/v1/test - Test endpoint
     ```
 
-**Pagination:**
+**Pagination and Sorting:**
 
-For endpoints that support pagination, you can use the following query parameters:
+For endpoints that support pagination and sorting, you can use the following query parameters:
 
 - _page_: The page number to retrieve (default is `1`).
 - _limit_: The number of items per page (default is `10`).
+- _sortBy_: The field to sort by (e.g., createdAt, views, likeCount, duration).
+- _sortType_: The sort order (asc for ascending, desc for descending).
+
+**Search:**
+For endpoints related to searching, you can use the following query parameters:
+
+- _searchQuery_: The search query string to filter results by title.
 
 **Example:**
 
 ```http
-GET /api/v1/posts/user/:ownerName?page=1&limit=10
+GET /api/v1/videos/channel/:ownerId?page=1&limit=10&sortBy=createdAt&sortType=desc
+GET /api/v1/videos/search?searchQuery=example&page=1&limit=10&sortBy=createdAt&sortType=desc
 ```
 
 
