@@ -71,23 +71,23 @@ Here are some of the main API endpoints:
 - User Routes:
 
     ```http
-    POST /api/v1/users/register: Register a new user
-    POST /api/v1/users/login: Login a user
-    POST /api/v1/users/refresh-token: Refresh access token
-    POST /api/v1/users/logout: Logout a user
-    GET /api/v1/users/me: Get authenticated user details
-    PATCH /api/v1/users/update-avatar: Update user avatar
-    PATCH /api/v1/users/update-cover-image: Update user cover image
-    GET /api/v1/users/channel/:userName: Get channel profile
-    PATCH /api/v1/users/change-password: Change password
+    POST /api/v1/users/register - Register a new user
+    POST /api/v1/users/login - Login a user
+    POST /api/v1/users/refresh-token - Refresh access token
+    POST /api/v1/users/logout - Logout a user
+    GET /api/v1/users/me - Get authenticated user details
+    PATCH /api/v1/users/update-avatar - Update user avatar
+    PATCH /api/v1/users/update-cover-image - Update user cover image
+    GET /api/v1/users/channel/:userName - Get channel profile
+    PATCH /api/v1/users/change-password - Change password
     ```
 
 - Subscription Routes:
 
     ```http
-    POST /api/v1/subscriptions/channel/:channelId: Toggle subscription
-    GET /api/v1/subscriptions/subscribers: Get the list of users subscribed to your channel
-    GET /api/v1/subscriptions/subscribed: Get the list of channels you are subscribed to
+    POST /api/v1/subscriptions/channel/:channelId - Toggle subscription
+    GET /api/v1/subscriptions/subscribers - Get the list of users subscribed to your channel
+    GET /api/v1/subscriptions/subscribed - Get the list of channels you are subscribed to
     ```
 
 - Post Routes:
@@ -102,7 +102,7 @@ Here are some of the main API endpoints:
 - Test Routes:
 
     ```http
-    GET /api/v1/test: Test endpoint
+    GET /api/v1/test - Test endpoint
     ```
 
 **Pagination:**
