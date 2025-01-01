@@ -133,6 +133,7 @@ For endpoints that support pagination and sorting, you can use the following que
 - _sortType_: The sort order (asc for ascending, desc for descending).
 
 **Search:**
+
 For endpoints related to searching, you can use the following query parameters:
 
 - _searchQuery_: The search query string to filter results by title.
