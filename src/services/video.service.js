@@ -330,6 +330,9 @@ const getVideoById = async (videoId, accessingUserId) => {
 		throw new ApiError(404, "Video not found")
 	}
 
+	const session = await mongoose.startSession()
+	session.startTransaction()
+
 	try {
 		/* 
 			Can't use Promise.all here because the order of the operations is important 
@@ -350,9 +353,13 @@ const getVideoById = async (videoId, accessingUserId) => {
 				// should have used a stack data structure but it's not available in MongoDB
 			}
 		)
+		await session.commitTransaction()
 	} catch (error) {
+		await session.abortTransaction()
 		console.error("Failed to update video views", error)
 		throw new ApiError(500, "Failed to update video views")
+	} finally {
+		session.endSession()
 	}
 
 	return videoWithMetaData[0]
