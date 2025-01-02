@@ -317,6 +317,7 @@ const getChannelProfile = async (userName, accessingUserId) => {
 /* 
 	watchHistory: [
 		{
+			_id,
 			owner: {
 				type: mongoose.Schema.Types.ObjectId,
 				ref: "User",
@@ -398,6 +399,7 @@ const getWatchHistory = async (userId, page = 1, limit = 10) => {
 		},
 		{
 			$project: {
+				"watchHistory._id": 1,
 				"watchHistory.owner": 1,
 				"watchHistory.thumbnail": 1,
 				"watchHistory.title": 1,
