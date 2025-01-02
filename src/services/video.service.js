@@ -331,13 +331,25 @@ const getVideoById = async (videoId, accessingUserId) => {
 	}
 
 	try {
-		await Promise.all([
-			Video.updateOne({ _id: videoId }, { $inc: { views: 1 } }),
-			User.updateOne(
-				{ _id: accessingUserId },
-				{ $addToSet: { watchHistory: videoId } }
-			),
-		])
+		/* 
+			Can't use Promise.all here because the order of the operations is important 
+			as the 2nd update must be after the 1st update
+		*/
+		await Video.updateOne({ _id: videoId }, { $inc: { views: 1 } })
+		await User.updateOne(
+			{ _id: accessingUserId },
+			{
+				$pull: { watchHistory: videoId },
+			}
+		)
+		await User.updateOne(
+			{ _id: accessingUserId },
+			{
+				$push: { watchHistory: { $each: [videoId], $position: 0 } },
+				// $each is used get the $position effect that adds the video to the beginning of the array
+				// should have used a stack data structure but it's not available in MongoDB
+			}
+		)
 	} catch (error) {
 		console.error("Failed to update video views", error)
 		throw new ApiError(500, "Failed to update video views")
