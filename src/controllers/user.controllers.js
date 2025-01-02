@@ -3,6 +3,7 @@ import ApiResponse from "../utils/ApiResponse.js"
 import {
 	changePassword,
 	getChannelProfile,
+	getWatchHistory,
 	login,
 	logout,
 	refreshAccessToken,
@@ -113,6 +114,13 @@ const getChannelProfileController = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "Channel profile fetched successfully", channel))
 })
 
+const getWatchHistoryController = asyncHandler(async (req, res) => {
+	const watchHistory = await getWatchHistory(req.user._id)
+	res
+		.status(200)
+		.json(new ApiResponse(200, "Watch history fetched successfully", watchHistory))
+})
+
 export {
 	registerUser,
 	loginUser,
@@ -123,4 +131,5 @@ export {
 	updateAvatarController,
 	updateCoverImageController,
 	getChannelProfileController,
+	getWatchHistoryController,
 }
