@@ -4,6 +4,7 @@ import {
 	changePasswordController,
 	getAuthenticatedUser,
 	getChannelProfileController,
+	getWatchHistoryController,
 	loginUser,
 	logoutUser,
 	refreshAccessTokenController,
@@ -66,5 +67,6 @@ userRouter.patch(
 	updateCoverImageController
 )
 userRouter.get("/channel/:userName", checkAuth, getChannelProfileController)
+userRouter.get("/watch-history", checkAuth, getWatchHistoryController)
 
 export default userRouter
