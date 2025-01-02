@@ -314,6 +314,110 @@ const getChannelProfile = async (userName, accessingUserId) => {
 	return channel[0]
 }
 
+/* 
+	watchHistory: [
+		{
+			owner: {
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "User",
+			},
+			thumbnail,
+			title,
+			views,
+			duration,
+			likesCount, // need a lookup with likes to calculate this
+			createdAt,
+		},
+		... // other videos in the watch history
+	],
+*/
+
+const getWatchHistory = async (userId, page = 1, limit = 10) => {
+	if (!userId) {
+		throw new ApiError(400, "User id is required")
+	}
+
+	/* 
+		$lookup returns an array of documents, so we need to unwind it
+		if we want to use the fields of the document in the next stages
+
+		$unwind is used to deconstruct an array field from the input documents 
+		to output a document for each element.
+	*/
+
+	const watchHistoryData = await User.aggregate([
+		{
+			$match: { _id: userId },
+		},
+		{
+			$unwind: "$watchHistory",
+		},
+		{
+			$lookup: {
+				from: "videos",
+				localField: "watchHistory",
+				foreignField: "_id",
+				as: "watchHistory",
+			},
+		},
+		{
+			$unwind: "$watchHistory",
+		},
+		{
+			$lookup: {
+				from: "users",
+				localField: "watchHistory.owner",
+				foreignField: "_id",
+				as: "owner",
+			},
+		},
+		{
+			$unwind: "$owner",
+		},
+		{
+			$lookup: {
+				from: "likes",
+				localField: "watchHistory._id",
+				foreignField: "video",
+				as: "likes",
+			},
+		},
+		{
+			$addFields: {
+				"watchHistory.likeCount": { $size: "$likes" },
+				"watchHistory.owner": {
+					_id: "$owner._id",
+					fullName: "$owner.fullName",
+					avatar: "$owner.avatar",
+				},
+			},
+		},
+		{
+			$project: {
+				"watchHistory.owner": 1,
+				"watchHistory.thumbnail": 1,
+				"watchHistory.title": 1,
+				"watchHistory.duration": 1,
+				"watchHistory.views": 1,
+				"watchHistory.likeCount": 1,
+				"watchHistory.createdAt": 1,
+			},
+		},
+		{
+			$skip: (page - 1) * limit,
+		},
+		{
+			$limit: limit,
+		},
+	])
+
+	if (!watchHistoryData) {
+		throw new ApiError(500, "Failed to fetch watch history")
+	}
+
+	return watchHistoryData.map(data => data.watchHistory)
+}
+
 export {
 	register,
 	login,
@@ -323,4 +427,5 @@ export {
 	updateAvatar,
 	updateCoverImage,
 	getChannelProfile,
+	getWatchHistory,
 }
