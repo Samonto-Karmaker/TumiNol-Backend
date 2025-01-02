@@ -345,6 +345,10 @@ const getWatchHistory = async (userId, page = 1, limit = 10) => {
 		to output a document for each element.
 	*/
 
+	let totalVideos = await User.findById(userId)
+		.select("watchHistory")
+		.then(user => user.watchHistory.length)
+
 	const watchHistoryData = await User.aggregate([
 		{
 			$match: { _id: userId },
@@ -415,7 +419,12 @@ const getWatchHistory = async (userId, page = 1, limit = 10) => {
 		throw new ApiError(500, "Failed to fetch watch history")
 	}
 
-	return watchHistoryData.map(data => data.watchHistory)
+	return {
+		watchHistory: watchHistoryData.map(data => data.watchHistory),
+		totalVideos,
+		totalPages: Math.ceil(totalVideos / limit),
+		currentPage: page,
+	}
 }
 
 export {
