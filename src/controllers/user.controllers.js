@@ -115,10 +115,15 @@ const getChannelProfileController = asyncHandler(async (req, res) => {
 })
 
 const getWatchHistoryController = asyncHandler(async (req, res) => {
-	const watchHistory = await getWatchHistory(req.user._id)
+	let { page, limit } = req.query
+	page = parseInt(page) || 1
+	limit = parseInt(limit) || 10
+	const watchHistory = await getWatchHistory(req.user._id, page, limit)
 	res
 		.status(200)
-		.json(new ApiResponse(200, "Watch history fetched successfully", watchHistory))
+		.json(
+			new ApiResponse(200, "Watch history fetched successfully", watchHistory)
+		)
 })
 
 export {
