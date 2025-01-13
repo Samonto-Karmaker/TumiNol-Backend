@@ -404,6 +404,18 @@ const getAllVideos = async (
 
 	try {
 		const totalVideos = await Video.countDocuments(constrains)
+		const offset = (page - 1) * limit
+		if (totalVideos === 0) {
+			return {
+				videos: [],
+				totalVideos: 0,
+				totalPages: 0,
+				currentPage: page,
+			}
+		}
+		if (offset >= totalVideos) {
+			throw new ApiError(404, "No more videos to show")
+		}
 		const videos = await Video.aggregate(
 			getVideoAggregate(constrains, sortBy, sortType, page, limit)
 		)
@@ -511,6 +523,18 @@ const searchVideosByTitle = async (
 
 	try {
 		const totalVideos = await Video.countDocuments(constrains)
+		const offset = (page - 1) * limit
+		if (totalVideos === 0) {
+			return {
+				videos: [],
+				totalVideos: 0,
+				totalPages: 0,
+				currentPage: page,
+			}
+		}
+		if (offset >= totalVideos) {
+			throw new ApiError(404, "No more videos to show")
+		}
 		const videos = await Video.aggregate(
 			getVideoAggregate(constrains, sortBy, sortType, page, limit)
 		)
