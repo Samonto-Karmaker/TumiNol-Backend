@@ -7,6 +7,7 @@ import {
 	getPostById,
 	getPostByOwnerName,
 } from "../services/post.service.js"
+import { STANDARD_LIMIT_PER_PAGE } from "../constants.js"
 
 const createPostController = asyncHandler(async (req, res) => {
 	const { content } = req.body
@@ -22,9 +23,9 @@ const getPostByIdController = asyncHandler(async (req, res) => {
 
 const getPostByOwnerNameController = asyncHandler(async (req, res) => {
 	const { ownerName } = req.params
-	let { page = 1, limit = 10 } = req.query
+	let { page = 1, limit = STANDARD_LIMIT_PER_PAGE } = req.query
 	page = parseInt(page) || 1
-	limit = parseInt(limit) || 10
+	limit = parseInt(limit) || STANDARD_LIMIT_PER_PAGE
 	const posts = await getPostByOwnerName(ownerName, req.user._id, page, limit)
 	res.json(new ApiResponse(200, "Posts retrieved successfully", posts))
 })

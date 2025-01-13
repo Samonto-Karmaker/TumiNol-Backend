@@ -11,7 +11,7 @@ import {
 	updateVideoThumbnail,
 	deleteVideo,
 } from "../services/video.service.js"
-import { VideoSortOptionsEnums, VideoSortOrdersEnums } from "../constants.js"
+import { STANDARD_LIMIT_PER_PAGE, VideoSortOptionsEnums, VideoSortOrdersEnums } from "../constants.js"
 
 const publishVideoController = asyncHandler(async (req, res) => {
 	const { title, description } = req.body
@@ -35,10 +35,10 @@ const getAllVideosController = asyncHandler(async (req, res) => {
 		sortBy = VideoSortOptionsEnums.CREATED_AT,
 		sortType = VideoSortOrdersEnums.DESC,
 		page = 1,
-		limit = 10,
+		limit = STANDARD_LIMIT_PER_PAGE,
 	} = req.query
 	page = parseInt(page) || 1
-	limit = parseInt(limit) || 10
+	limit = parseInt(limit) || STANDARD_LIMIT_PER_PAGE
 	const videos = await getAllVideos(sortBy, sortType, page, limit)
 	res
 		.status(200)
@@ -51,10 +51,10 @@ const searchVideosByTitleController = asyncHandler(async (req, res) => {
 		sortBy = VideoSortOptionsEnums.CREATED_AT,
 		sortType = VideoSortOrdersEnums.DESC,
 		page = 1,
-		limit = 10,
+		limit = STANDARD_LIMIT_PER_PAGE,
 	} = req.query
 	page = parseInt(page) || 1
-	limit = parseInt(limit) || 10
+	limit = parseInt(limit) || STANDARD_LIMIT_PER_PAGE
 	const videos = await searchVideosByTitle(
 		searchQuery,
 		sortBy,

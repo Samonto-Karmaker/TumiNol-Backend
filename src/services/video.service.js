@@ -10,6 +10,7 @@ import {
 	VideoSortOptionsEnums,
 	VideoSortOrdersEnums,
 	HIGHEST_LIMIT_PER_PAGE,
+	STANDARD_LIMIT_PER_PAGE,
 } from "../constants.js"
 import { User } from "../models/User.js"
 import { extractPublicId } from "cloudinary-build-url"
@@ -383,7 +384,7 @@ const getAllVideos = async (
 	sortBy = VideoSortOptionsEnums.CREATED_AT,
 	sortType = VideoSortOrdersEnums.DESC,
 	page = 1,
-	limit = 10
+	limit = STANDARD_LIMIT_PER_PAGE
 ) => {
 	if (!Object.values(VideoSortOptionsEnums).includes(sortBy)) {
 		throw new ApiError(400, "Invalid sort by option")
@@ -431,7 +432,7 @@ const getVideosByOwnerId = async (
 	sortBy = VideoSortOptionsEnums.CREATED_AT,
 	sortType = VideoSortOrdersEnums.DESC,
 	page = 1,
-	limit = 10
+	limit = STANDARD_LIMIT_PER_PAGE
 ) => {
 	if (!ownerId || !isValidObjectId(ownerId)) {
 		throw new ApiError(400, "A valid owner ID is required")
@@ -488,7 +489,7 @@ const searchVideosByTitle = async (
 	sortBy = VideoSortOptionsEnums.CREATED_AT,
 	sortType = VideoSortOrdersEnums.DESC,
 	page = 1,
-	limit = 10
+	limit = STANDARD_LIMIT_PER_PAGE
 ) => {
 	if (!searchQuery) {
 		throw new ApiError(400, "Search query is required")

@@ -3,7 +3,10 @@ import { Post } from "../models/Post.js"
 import ApiError from "../utils/ApiError.js"
 import { isValidObjectId } from "../utils/validateObjectId.js"
 import { User } from "../models/User.js"
-import { HIGHEST_LIMIT_PER_PAGE } from "../constants.js"
+import {
+	HIGHEST_LIMIT_PER_PAGE,
+	STANDARD_LIMIT_PER_PAGE,
+} from "../constants.js"
 
 // Helper functions
 const getPostAggregate = (match, accessingUserId) => [
@@ -124,7 +127,7 @@ const getPostByOwnerName = async (
 	ownerName,
 	accessingUserId,
 	page = 1,
-	limit = 10
+	limit = STANDARD_LIMIT_PER_PAGE
 ) => {
 	if (!ownerName) {
 		throw new ApiError(400, "A valid owner ID is required")
