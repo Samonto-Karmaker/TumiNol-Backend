@@ -47,7 +47,30 @@ const toggleVideoLike = async (videoId, userId) => {
     return toggleLike({ video: videoId }, userId)
 }
 
-const toggleCommentLike = async (commentId, userId) => {}
+const toggleCommentLike = async (commentId, userId) => {
+    if (!commentId || !isValidObjectId(commentId)) {
+        throw new ApiError(400, "Invalid commentId")
+    }
+    if (!userId) {
+        throw new ApiError(400, "Invalid userId")
+    }
+
+    try {
+        const comment = await Comment.findById(commentId).select("_id")
+        if (!comment) {
+            throw new ApiError(404, "Comment not found")
+        }
+    }
+    catch (error) {
+        if (error instanceof ApiError) {
+            throw error
+        }
+        console.error("Failed to find comment: ", error)
+        throw new ApiError(500, "Internal Server Error")
+    }
+
+    return toggleLike({ comment: commentId }, userId)
+}
 
 const togglePostLike = async (postId, userId) => {
     if (!postId || !isValidObjectId(postId)) {
