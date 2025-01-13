@@ -145,13 +145,9 @@ const getPostByOwnerName = async (
 			throw new ApiError(404, "Owner not found")
 		}
 
-		const offset = (page - 1) * limit
 		const totalPosts = await Post.countDocuments({ owner: owner._id })
 		if (totalPosts === 0) {
 			throw new ApiError(404, "Posts not found")
-		}
-		if (offset >= totalPosts) {
-			throw new ApiError(404, "No more posts to show")
 		}
 
 		const posts = await Post.aggregate([
