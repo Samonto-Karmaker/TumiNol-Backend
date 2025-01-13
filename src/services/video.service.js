@@ -546,6 +546,9 @@ const searchVideosByTitle = async (
 			currentPage: page,
 		}
 	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error
+		}
 		console.error("Failed to search videos by title", error)
 		throw new ApiError(500, "Failed to search videos by title")
 	}
