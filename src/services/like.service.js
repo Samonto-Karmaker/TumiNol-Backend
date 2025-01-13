@@ -8,7 +8,7 @@ const toggleLike = async (resourceObject, userId) => {
     try {
         const like = await Like.findOne({ ...resourceObject, likedBy: userId })
         if (like) {
-            await like.remove()
+            await Like.findByIdAndDelete(like._id)
             return { message: "unlike" }
         } else {
             await Like.create({ ...resourceObject, likedBy: userId })
