@@ -12,6 +12,7 @@ import {
 	updateCoverImage,
 } from "../services/user.service.js"
 import ms from "ms"
+import { STANDARD_LIMIT_PER_PAGE } from "../constants.js"
 
 const registerUser = asyncHandler(async (req, res) => {
 	const { fullName, email, userName, password } = req.body
@@ -117,7 +118,7 @@ const getChannelProfileController = asyncHandler(async (req, res) => {
 const getWatchHistoryController = asyncHandler(async (req, res) => {
 	let { page, limit } = req.query
 	page = parseInt(page) || 1
-	limit = parseInt(limit) || 10
+	limit = parseInt(limit) || STANDARD_LIMIT_PER_PAGE
 	const watchHistory = await getWatchHistory(req.user._id, page, limit)
 	res
 		.status(200)

@@ -6,6 +6,10 @@ import {
 	uploadOnCloudinary,
 } from "../utils/cloudinary.js"
 import { extractPublicId } from "cloudinary-build-url"
+import {
+	STANDARD_LIMIT_PER_PAGE,
+	HIGHEST_LIMIT_PER_PAGE,
+} from "../constants.js"
 
 // Helper functions
 const generateAccessAndRefreshToken = async userId => {
@@ -339,7 +343,11 @@ const getChannelProfile = async (userName, accessingUserId) => {
 	],
 */
 
-const getWatchHistory = async (userId, page = 1, limit = 10) => {
+const getWatchHistory = async (
+	userId,
+	page = 1,
+	limit = STANDARD_LIMIT_PER_PAGE
+) => {
 	if (!userId) {
 		throw new ApiError(400, "User id is required")
 	}
@@ -352,9 +360,22 @@ const getWatchHistory = async (userId, page = 1, limit = 10) => {
 		to output a document for each element.
 	*/
 
-	let totalVideos = await User.findById(userId)
+	if (page < 1 || limit < 1 || limit > HIGHEST_LIMIT_PER_PAGE) {
+		throw new ApiError(400, "Invalid page or limit")
+	}
+
+	const totalVideos = await User.findById(userId)
 		.select("watchHistory")
 		.then(user => user.watchHistory.length)
+
+	if (totalVideos === 0) {
+		return {
+			watchHistory: [],
+			totalVideos: 0,
+			totalPages: 0,
+			currentPage: page,
+		}
+	}
 
 	const watchHistoryData = await User.aggregate([
 		{
