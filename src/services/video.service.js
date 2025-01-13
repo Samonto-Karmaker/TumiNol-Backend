@@ -389,6 +389,10 @@ const getAllVideos = async (
 		throw new ApiError(400, "Invalid sort type option")
 	}
 
+	if (page < 1 || limit < 1) {
+		throw new ApiError(400, "Invalid page or limit value")
+	}
+
 	const constrains = {
 		isPublished: true,
 	}
@@ -430,6 +434,9 @@ const getVideosByOwnerId = async (
 	}
 	if (!accessingUserId) {
 		throw new ApiError(400, "Accessing user ID is required")
+	}
+	if (page < 1 || limit < 1) {
+		throw new ApiError(400, "Invalid page or limit value")
 	}
 	if (!Object.values(VideoSortOptionsEnums).includes(sortBy)) {
 		throw new ApiError(400, "Invalid sort by option")

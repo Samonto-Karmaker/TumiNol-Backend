@@ -131,6 +131,9 @@ const getPostByOwnerName = async (
 	if (!accessingUserId) {
 		throw new ApiError(400, "Accessing user ID is required")
 	}
+	if (page < 1 || limit < 1) {
+		throw new ApiError(400, "Invalid page or limit value")
+	}
 
 	try {
 		const owner = await User.findOne({ userName: ownerName }).select("_id")
