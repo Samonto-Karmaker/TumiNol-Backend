@@ -23,6 +23,9 @@ const generateAccessAndRefreshToken = async userId => {
 
 		return { accessToken, refreshToken }
 	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error
+		}
 		console.error("Failed to generate access and refresh token", error)
 		throw new ApiError(500, "Failed to generate access and refresh token")
 	}
@@ -156,6 +159,9 @@ const refreshAccessToken = async incomingRefreshToken => {
 
 		return { accessToken, refreshToken }
 	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error
+		}
 		console.error("Failed to refresh access token", error)
 		throw new ApiError(500, "Failed to refresh access token", error)
 	}
