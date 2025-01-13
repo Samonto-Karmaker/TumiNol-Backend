@@ -9,6 +9,7 @@ import { isValidObjectId } from "../utils/validateObjectId.js"
 import { VideoSortOptionsEnums, VideoSortOrdersEnums } from "../constants.js"
 import { User } from "../models/User.js"
 import { extractPublicId } from "cloudinary-build-url"
+import escape from "../utils/escape.js"
 
 // Helper functions
 const getVideoAggregate = (match, sortBy, sortType, page, limit) => [
@@ -478,7 +479,7 @@ const searchVideosByTitle = async (
 
 	const constrains = {
 		isPublished: true,
-		title: { $regex: searchQuery, $options: "i" },
+		title: { $regex: escape(searchQuery), $options: "i" },
 	}
 
 	try {
