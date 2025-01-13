@@ -168,6 +168,9 @@ const updateVideoDetails = async (userId, videoId, videoDetails) => {
 
 		return updatedVideo
 	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error
+		}
 		console.error("Failed to update video details", error)
 		throw new ApiError(500, "Failed to update video details")
 	}
@@ -223,6 +226,9 @@ const updateVideoThumbnail = async (userId, videoId, file) => {
 
 		return updatedVideo
 	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error
+		}
 		console.error("Failed to update video thumbnail", error)
 		throw new ApiError(500, "Failed to update video thumbnail")
 	}
@@ -253,6 +259,9 @@ const deleteVideo = async (userId, videoId) => {
 
 		console.log(`Video deleted with id: ${videoId}`)
 	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error
+		}
 		console.error("Failed to delete video", error)
 		throw new ApiError(500, "Failed to delete video")
 	}
@@ -455,6 +464,9 @@ const getVideosByOwnerId = async (
 			currentPage: page,
 		}
 	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error
+		}
 		console.error("Failed to get videos by user", error)
 		throw new ApiError(500, "Failed to get videos by user")
 	}
@@ -523,6 +535,9 @@ const togglePublishStatus = async (userId, videoId) => {
 			isPublished: video.isPublished,
 		}
 	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error
+		}
 		console.error("Failed to toggle publish status", error)
 		throw new ApiError(500, "Failed to toggle publish status")
 	}
