@@ -111,6 +111,9 @@ const getPostById = async (postId, accessingUserId) => {
 
 		return postWithMetadata[0]
 	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error
+		}
 		console.error("Failed to get post", error)
 		throw new ApiError(500, "Failed to get post")
 	}
@@ -165,6 +168,9 @@ const getPostByOwnerName = async (
 			currentPage: page,
 		}
 	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error
+		}
 		console.error("Failed to get posts", error)
 		throw new ApiError(500, "Failed to get posts")
 	}
@@ -195,6 +201,9 @@ const editPost = async (postId, ownerId, content) => {
 		post.content = content
 		return await post.save()
 	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error
+		}
 		console.error("Failed to edit post", error)
 		throw new ApiError(500, "Failed to edit post")
 	}
@@ -218,6 +227,9 @@ const deletePost = async (postId, ownerId) => {
 		}
 		await Post.findByIdAndDelete(post._id)
 	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error
+		}
 		console.error("Failed to delete post", error)
 		throw new ApiError(500, "Failed to delete post")
 	}
