@@ -377,6 +377,11 @@ const getWatchHistory = async (
 		}
 	}
 
+	const totalPages = Math.ceil(totalVideos / limit)
+	if (page > totalPages) {
+		throw new ApiError(400, "Invalid page value")
+	}
+
 	const watchHistoryData = await User.aggregate([
 		{
 			$match: { _id: userId },
@@ -451,7 +456,7 @@ const getWatchHistory = async (
 	return {
 		watchHistory: watchHistoryData.map(data => data.watchHistory),
 		totalVideos,
-		totalPages: Math.ceil(totalVideos / limit),
+		totalPages,
 		currentPage: page,
 	}
 }

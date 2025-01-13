@@ -154,6 +154,11 @@ const getPostByOwnerName = async (
 				currentPage: page,
 			}
 		}
+		
+		const totalPages = Math.ceil(totalPosts / limit)
+		if (page > totalPages) {
+			throw new ApiError(400, "Invalid page value")
+		}
 
 		const posts = await Post.aggregate([
 			...getPostAggregate(owner._id, accessingUserId),
@@ -168,7 +173,7 @@ const getPostByOwnerName = async (
 		return {
 			posts,
 			totalPosts,
-			totalPages: Math.ceil(totalPosts / limit),
+			totalPages,
 			currentPage: page,
 		}
 	} catch (error) {

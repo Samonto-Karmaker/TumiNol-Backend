@@ -412,6 +412,12 @@ const getAllVideos = async (
 				currentPage: page,
 			}
 		}
+
+		const totalPages = Math.ceil(totalVideos / limit)
+		if (page > totalPages) {
+			throw new ApiError(400, "Invalid page value")
+		}
+
 		const videos = await Video.aggregate(
 			getVideoAggregate(constrains, sortBy, sortType, page, limit)
 		)
@@ -419,10 +425,13 @@ const getAllVideos = async (
 		return {
 			videos,
 			totalVideos,
-			totalPages: Math.ceil(totalVideos / limit),
+			totalPages,
 			currentPage: page,
 		}
 	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error
+		}
 		console.error("Failed to get all videos", error)
 		throw new ApiError(500, "Failed to get all videos")
 	}
@@ -527,6 +536,12 @@ const searchVideosByTitle = async (
 				currentPage: page,
 			}
 		}
+
+		const totalPages = Math.ceil(totalVideos / limit)
+		if (page > totalPages) {
+			throw new ApiError(400, "Invalid page value")
+		}
+
 		const videos = await Video.aggregate(
 			getVideoAggregate(constrains, sortBy, sortType, page, limit)
 		)
@@ -534,7 +549,7 @@ const searchVideosByTitle = async (
 		return {
 			videos,
 			totalVideos,
-			totalPages: Math.ceil(totalVideos / limit),
+			totalPages,
 			currentPage: page,
 		}
 	} catch (error) {
