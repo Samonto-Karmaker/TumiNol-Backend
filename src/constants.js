@@ -7,6 +7,7 @@ const TEMP_DIR = path.join(__dirname, "..", "public", "temp")
 
 const DB_NAME = "tuminol"
 const API_URL = "/api/v1"
+const HIGHEST_LIMIT_PER_PAGE = 50
 
 const VideoSortOptionsEnums = Object.freeze({
 	CREATED_AT: "createdAt",
@@ -23,6 +24,7 @@ const VideoSortOrdersEnums = Object.freeze({
 export {
 	DB_NAME,
 	API_URL,
+	HIGHEST_LIMIT_PER_PAGE,
 	TEMP_DIR,
 	VideoSortOptionsEnums,
 	VideoSortOrdersEnums,

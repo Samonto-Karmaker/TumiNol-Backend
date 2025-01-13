@@ -3,6 +3,7 @@ import { Post } from "../models/Post.js"
 import ApiError from "../utils/ApiError.js"
 import { isValidObjectId } from "../utils/validateObjectId.js"
 import { User } from "../models/User.js"
+import { HIGHEST_LIMIT_PER_PAGE } from "../constants.js"
 
 // Helper functions
 const getPostAggregate = (match, accessingUserId) => [
@@ -131,7 +132,7 @@ const getPostByOwnerName = async (
 	if (!accessingUserId) {
 		throw new ApiError(400, "Accessing user ID is required")
 	}
-	if (page < 1 || limit < 1) {
+	if (page < 1 || limit < 1 || limit > HIGHEST_LIMIT_PER_PAGE) {
 		throw new ApiError(400, "Invalid page or limit value")
 	}
 

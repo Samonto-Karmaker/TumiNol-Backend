@@ -6,7 +6,11 @@ import {
 	uploadOnCloudinary,
 } from "../utils/cloudinary.js"
 import { isValidObjectId } from "../utils/validateObjectId.js"
-import { VideoSortOptionsEnums, VideoSortOrdersEnums } from "../constants.js"
+import {
+	VideoSortOptionsEnums,
+	VideoSortOrdersEnums,
+	HIGHEST_LIMIT_PER_PAGE,
+} from "../constants.js"
 import { User } from "../models/User.js"
 import { extractPublicId } from "cloudinary-build-url"
 import escape from "../utils/escape.js"
@@ -389,7 +393,7 @@ const getAllVideos = async (
 		throw new ApiError(400, "Invalid sort type option")
 	}
 
-	if (page < 1 || limit < 1) {
+	if (page < 1 || limit < 1 || limit > HIGHEST_LIMIT_PER_PAGE) {
 		throw new ApiError(400, "Invalid page or limit value")
 	}
 
@@ -435,7 +439,7 @@ const getVideosByOwnerId = async (
 	if (!accessingUserId) {
 		throw new ApiError(400, "Accessing user ID is required")
 	}
-	if (page < 1 || limit < 1) {
+	if (page < 1 || limit < 1 || limit > HIGHEST_LIMIT_PER_PAGE) {
 		throw new ApiError(400, "Invalid page or limit value")
 	}
 	if (!Object.values(VideoSortOptionsEnums).includes(sortBy)) {
@@ -494,6 +498,9 @@ const searchVideosByTitle = async (
 	}
 	if (!Object.values(VideoSortOrdersEnums).includes(sortType)) {
 		throw new ApiError(400, "Invalid sort type option")
+	}
+	if (page < 1 || limit < 1 || limit > HIGHEST_LIMIT_PER_PAGE) {
+		throw new ApiError(400, "Invalid page or limit value")
 	}
 
 	const constrains = {

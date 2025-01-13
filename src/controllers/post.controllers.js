@@ -23,8 +23,8 @@ const getPostByIdController = asyncHandler(async (req, res) => {
 const getPostByOwnerNameController = asyncHandler(async (req, res) => {
 	const { ownerName } = req.params
 	let { page = 1, limit = 10 } = req.query
-	page = parseInt(page)
-	limit = parseInt(limit)
+	page = parseInt(page) || 1
+	limit = parseInt(limit) || 10
 	const posts = await getPostByOwnerName(ownerName, req.user._id, page, limit)
 	res.json(new ApiResponse(200, "Posts retrieved successfully", posts))
 })

@@ -37,8 +37,8 @@ const getAllVideosController = asyncHandler(async (req, res) => {
 		page = 1,
 		limit = 10,
 	} = req.query
-	page = parseInt(page)
-	limit = parseInt(limit)
+	page = parseInt(page) || 1
+	limit = parseInt(limit) || 10
 	const videos = await getAllVideos(sortBy, sortType, page, limit)
 	res
 		.status(200)
@@ -53,8 +53,8 @@ const searchVideosByTitleController = asyncHandler(async (req, res) => {
 		page = 1,
 		limit = 10,
 	} = req.query
-	page = parseInt(page)
-	limit = parseInt(limit)
+	page = parseInt(page) || 1
+	limit = parseInt(limit) || 10
 	const videos = await searchVideosByTitle(
 		searchQuery,
 		sortBy,
