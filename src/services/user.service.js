@@ -373,7 +373,7 @@ const getWatchHistory = async (
 			watchHistory: [],
 			totalVideos: 0,
 			totalPages: 0,
-			currentPage: page,
+			currentPage: 0,
 		}
 	}
 

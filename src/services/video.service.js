@@ -409,7 +409,7 @@ const getAllVideos = async (
 				videos: [],
 				totalVideos: 0,
 				totalPages: 0,
-				currentPage: page,
+				currentPage: 0,
 			}
 		}
 
@@ -533,7 +533,7 @@ const searchVideosByTitle = async (
 				videos: [],
 				totalVideos: 0,
 				totalPages: 0,
-				currentPage: page,
+				currentPage: 0,
 			}
 		}
 

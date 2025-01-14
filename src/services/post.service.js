@@ -151,7 +151,7 @@ const getPostByOwnerName = async (
 				posts: [],
 				totalPosts: 0,
 				totalPages: 0,
-				currentPage: page,
+				currentPage: 0,
 			}
 		}
 		
