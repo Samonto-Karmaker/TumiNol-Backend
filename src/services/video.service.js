@@ -15,6 +15,7 @@ import {
 import { User } from "../models/User.js"
 import { extractPublicId } from "cloudinary-build-url"
 import escape from "../utils/escape.js"
+import PaginationResponseDTO from "../db/DTOs/PaginationResponseDTO.js"
 
 // Helper functions
 const getVideoAggregate = (match, sortBy, sortType, page, limit) => [
@@ -404,16 +405,11 @@ const getAllVideos = async (
 
 	try {
 		const totalVideos = await Video.countDocuments(constrains)
-		if (totalVideos === 0) {
-			return {
-				videos: [],
-				totalVideos: 0,
-				totalPages: 0,
-				currentPage: 0,
-			}
-		}
-
 		const totalPages = Math.ceil(totalVideos / limit)
+
+		if (totalVideos === 0) {
+			return new PaginationResponseDTO([], totalVideos, totalPages, 0)
+		}
 		if (page > totalPages) {
 			throw new ApiError(400, "Invalid page value")
 		}
@@ -422,12 +418,7 @@ const getAllVideos = async (
 			getVideoAggregate(constrains, sortBy, sortType, page, limit)
 		)
 
-		return {
-			videos,
-			totalVideos,
-			totalPages,
-			currentPage: page,
-		}
+		return new PaginationResponseDTO(videos, totalVideos, totalPages, page)
 	} catch (error) {
 		if (error instanceof ApiError) {
 			throw error
@@ -528,16 +519,11 @@ const searchVideosByTitle = async (
 
 	try {
 		const totalVideos = await Video.countDocuments(constrains)
-		if (totalVideos === 0) {
-			return {
-				videos: [],
-				totalVideos: 0,
-				totalPages: 0,
-				currentPage: 0,
-			}
-		}
-
 		const totalPages = Math.ceil(totalVideos / limit)
+
+		if (totalVideos === 0) {
+			return new PaginationResponseDTO([], totalVideos, totalPages, 0)
+		}
 		if (page > totalPages) {
 			throw new ApiError(400, "Invalid page value")
 		}
@@ -546,12 +532,7 @@ const searchVideosByTitle = async (
 			getVideoAggregate(constrains, sortBy, sortType, page, limit)
 		)
 
-		return {
-			videos,
-			totalVideos,
-			totalPages,
-			currentPage: page,
-		}
+		return new PaginationResponseDTO(videos, totalVideos, totalPages, page)
 	} catch (error) {
 		if (error instanceof ApiError) {
 			throw error
