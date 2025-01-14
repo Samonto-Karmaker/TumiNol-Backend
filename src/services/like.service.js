@@ -168,11 +168,6 @@ const getLikedVideos = async (
 			{
 				$addFields: {
 					"video.likeCount": { $size: "$video.likes" },
-					"video.owner": {
-						_id: "$video.owner._id",
-						fullName: "$video.owner.fullName",
-						avatar: "$video.owner.avatar",
-					},
 				},
 			},
 			{
@@ -183,8 +178,13 @@ const getLikedVideos = async (
 					"video.views": 1,
 					"video.duration": 1,
 					"video.createdAt": 1,
-					"video.owner": 1,
+					"video.owner": {
+						"_id": 1,
+						"fullName": 1,
+						"avatar": 1,
+					},
 					"video.likeCount": 1,
+					"createdAt": 1,
 				},
 			},
 			{
