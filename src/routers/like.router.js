@@ -1,6 +1,7 @@
 import { Router } from "express"
 import { checkAuth } from "../middlewares/common/authCheck.middleware.js"
 import {
+	getLikedVideosController,
 	toggleCommentLikeController,
 	togglePostLikeController,
 	toggleVideoLikeController,
@@ -12,5 +13,6 @@ likeRouter.use(checkAuth)
 likeRouter.post("/video/:videoId", toggleVideoLikeController)
 likeRouter.post("/post/:postId", togglePostLikeController)
 likeRouter.post("/comment/:commentId", toggleCommentLikeController)
+likeRouter.get("/videos", getLikedVideosController)
 
 export default likeRouter
