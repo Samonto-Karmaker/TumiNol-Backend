@@ -7,6 +7,7 @@ import {
 	STANDARD_LIMIT_PER_PAGE,
 	HIGHEST_LIMIT_PER_PAGE,
 } from "../constants.js"
+import PaginationResponseDTO from "../db/DTOs/PaginationResponseDTO.js"
 
 // Helper functions
 const toggleLike = async (resourceObject, userId) => {
@@ -117,7 +118,7 @@ const getLikedVideos = async (
 		})
 		const totalPages = Math.ceil(totalLikedVideos / limit)
 		if (totalLikedVideos === 0) {
-			return { likedVideos: [], totalLikedVideos, totalPages, currentPage: 0 }
+			return new PaginationResponseDTO([], totalLikedVideos, totalPages, 0)
 		}
 		if (page > totalPages) {
 			throw new ApiError(400, "Invalid page")
@@ -179,9 +180,9 @@ const getLikedVideos = async (
 					"video.duration": 1,
 					"video.createdAt": 1,
 					"video.owner": {
-						"_id": 1,
-						"fullName": 1,
-						"avatar": 1,
+						_id: 1,
+						fullName: 1,
+						avatar: 1,
 					},
 					"video.likeCount": 1,
 					"createdAt": 1,
@@ -200,7 +201,12 @@ const getLikedVideos = async (
 			},
 		])
 
-		return { likedVideos, totalLikedVideos, totalPages, currentPage: page }
+		return new PaginationResponseDTO(
+			likedVideos,
+			totalLikedVideos,
+			totalPages,
+			page
+		)
 	} catch (error) {
 		if (error instanceof ApiError) {
 			throw error

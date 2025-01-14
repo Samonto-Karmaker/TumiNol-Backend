@@ -1,10 +1,10 @@
 class PaginationResponseDTO {
-    constructor(data, sizeOfData, totalPages, currentPage) {
-        this.data = data;
-        this.sizeOfData = sizeOfData;
-        this.totalPages = totalPages;
-        this.currentPage = currentPage;
-    }
+	constructor(data, totalItems, totalPages, currentPage) {
+		this.data = data
+		this.totalItems = totalItems
+		this.totalPages = totalPages
+		this.currentPage = currentPage
+	}
 }
 
-export default PaginationResponseDTO;
+export default PaginationResponseDTO
