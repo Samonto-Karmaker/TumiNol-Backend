@@ -7,7 +7,7 @@ import {
 	STANDARD_LIMIT_PER_PAGE,
 	HIGHEST_LIMIT_PER_PAGE,
 } from "../constants.js"
-import PaginationResponseDTO from "../db/DTOs/PaginationResponseDTO.js"
+import PaginationResponseDTO from "../DTOs/PaginationResponseDTO.js"
 
 // Helper functions
 const toggleLike = async (resourceObject, userId) => {

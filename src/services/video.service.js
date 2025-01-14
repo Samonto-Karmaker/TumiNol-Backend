@@ -15,7 +15,7 @@ import {
 import { User } from "../models/User.js"
 import { extractPublicId } from "cloudinary-build-url"
 import escape from "../utils/escape.js"
-import PaginationResponseDTO from "../db/DTOs/PaginationResponseDTO.js"
+import PaginationResponseDTO from "../DTOs/PaginationResponseDTO.js"
 
 // Helper functions
 const getVideoAggregate = (match, sortBy, sortType, page, limit) => [

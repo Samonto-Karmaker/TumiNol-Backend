@@ -7,7 +7,7 @@ import {
 	HIGHEST_LIMIT_PER_PAGE,
 	STANDARD_LIMIT_PER_PAGE,
 } from "../constants.js"
-import PaginationResponseDTO from "../db/DTOs/PaginationResponseDTO.js"
+import PaginationResponseDTO from "../DTOs/PaginationResponseDTO.js"
 
 // Helper functions
 const getPostAggregate = (match, accessingUserId) => [
