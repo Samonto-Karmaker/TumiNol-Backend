@@ -10,6 +10,7 @@ import {
 	STANDARD_LIMIT_PER_PAGE,
 	HIGHEST_LIMIT_PER_PAGE,
 } from "../constants.js"
+import PaginationResponseDTO from "../db/DTOs/PaginationResponseDTO.js"
 
 // Helper functions
 const generateAccessAndRefreshToken = async userId => {
@@ -368,16 +369,10 @@ const getWatchHistory = async (
 		.select("watchHistory")
 		.then(user => user.watchHistory.length)
 
-	if (totalVideos === 0) {
-		return {
-			watchHistory: [],
-			totalVideos: 0,
-			totalPages: 0,
-			currentPage: 0,
-		}
-	}
-
 	const totalPages = Math.ceil(totalVideos / limit)
+	if (totalVideos === 0) {
+		return new PaginationResponseDTO([], totalVideos, totalPages, 0)
+	}
 	if (page > totalPages) {
 		throw new ApiError(400, "Invalid page value")
 	}
@@ -453,12 +448,12 @@ const getWatchHistory = async (
 		throw new ApiError(500, "Failed to fetch watch history")
 	}
 
-	return {
-		watchHistory: watchHistoryData.map(data => data.watchHistory),
+	return new PaginationResponseDTO(
+		watchHistoryData.map(data => data.watchHistory),
 		totalVideos,
 		totalPages,
-		currentPage: page,
-	}
+		page
+	)
 }
 
 export {
