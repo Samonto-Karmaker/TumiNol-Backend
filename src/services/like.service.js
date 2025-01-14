@@ -3,6 +3,10 @@ import { Video } from "../models/Video.js"
 import { Post } from "../models/Post.js"
 import ApiError from "../utils/ApiError.js"
 import { isValidObjectId } from "../utils/validateObjectId.js"
+import {
+	STANDARD_LIMIT_PER_PAGE,
+	HIGHEST_LIMIT_PER_PAGE,
+} from "../constants.js"
 
 // Helper functions
 const toggleLike = async (resourceObject, userId) => {
@@ -94,6 +98,116 @@ const togglePostLike = async (postId, userId) => {
 	return toggleLike({ post: postId }, userId)
 }
 
-const getLikedVideos = async userId => {}
+const getLikedVideos = async (
+	userId,
+	page = 1,
+	limit = STANDARD_LIMIT_PER_PAGE
+) => {
+	if (!userId) {
+		throw new ApiError(400, "Invalid userId")
+	}
+	if (page < 1 || limit < 1 || limit > HIGHEST_LIMIT_PER_PAGE) {
+		throw new ApiError(400, "Invalid page or limit")
+	}
+
+	try {
+		const totalLikedVideos = await Like.countDocuments({
+			likedBy: userId,
+			video: { $exists: true },
+		})
+		const totalPages = Math.ceil(totalLikedVideos / limit)
+		if (totalLikedVideos === 0) {
+			return { likedVideos: [], totalLikedVideos, totalPages, currentPage: 0 }
+		}
+		if (page > totalPages) {
+			throw new ApiError(400, "Invalid page")
+		}
+
+		const likedVideos = await Like.aggregate([
+			{
+				$match: {
+					likedBy: userId,
+					video: { $exists: true },
+				},
+			},
+			{
+				$lookup: {
+					from: "videos",
+					localField: "video",
+					foreignField: "_id",
+					as: "video",
+				},
+			},
+			{
+				$unwind: "$video",
+			},
+			{
+				$match: {
+					"video.isPublished": true,
+				},
+			},
+			{
+				$lookup: {
+					from: "users",
+					localField: "video.owner",
+					foreignField: "_id",
+					as: "video.owner",
+				},
+			},
+			{
+				$unwind: "$video.owner",
+			},
+			{
+				$lookup: {
+					from: "likes",
+					localField: "video._id",
+					foreignField: "video",
+					as: "video.likes",
+				},
+			},
+			{
+				$addFields: {
+					"video.likeCount": { $size: "$video.likes" },
+					"video.owner": {
+						_id: "$video.owner._id",
+						fullName: "$video.owner.fullName",
+						avatar: "$video.owner.avatar",
+					},
+				},
+			},
+			{
+				$project: {
+					"video._id": 1,
+					"video.title": 1,
+					"video.thumbnail": 1,
+					"video.views": 1,
+					"video.duration": 1,
+					"video.createdAt": 1,
+					"video.owner": 1,
+					"video.likeCount": 1,
+				},
+			},
+			{
+				$sort: {
+					createdAt: -1,
+				},
+			},
+			{
+				$skip: (page - 1) * limit,
+			},
+			{
+				$limit: limit,
+			},
+		])
+
+		return { likedVideos, totalLikedVideos, totalPages, currentPage: page }
+	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error
+		}
+		console.error("Failed to count liked videos: ", error)
+		throw new ApiError(500, "Internal Server Error")
+	}
+}
 
 export { toggleVideoLike, toggleCommentLike, togglePostLike, getLikedVideos }
