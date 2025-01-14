@@ -7,6 +7,7 @@ import {
 	HIGHEST_LIMIT_PER_PAGE,
 	STANDARD_LIMIT_PER_PAGE,
 } from "../constants.js"
+import PaginationResponseDTO from "../db/DTOs/PaginationResponseDTO.js"
 
 // Helper functions
 const getPostAggregate = (match, accessingUserId) => [
@@ -146,16 +147,10 @@ const getPostByOwnerName = async (
 		}
 
 		const totalPosts = await Post.countDocuments({ owner: owner._id })
-		if (totalPosts === 0) {
-			return {
-				posts: [],
-				totalPosts: 0,
-				totalPages: 0,
-				currentPage: 0,
-			}
-		}
-		
 		const totalPages = Math.ceil(totalPosts / limit)
+		if (totalPosts === 0) {
+			return new PaginationResponseDTO([], totalPosts, totalPages, 0)
+		}
 		if (page > totalPages) {
 			throw new ApiError(400, "Invalid page value")
 		}
@@ -170,12 +165,7 @@ const getPostByOwnerName = async (
 			},
 		])
 
-		return {
-			posts,
-			totalPosts,
-			totalPages,
-			currentPage: page,
-		}
+		return new PaginationResponseDTO(posts, totalPosts, totalPages, page)
 	} catch (error) {
 		if (error instanceof ApiError) {
 			throw error
