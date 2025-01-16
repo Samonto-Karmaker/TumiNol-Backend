@@ -25,6 +25,13 @@ const commentSchema = new mongoose.Schema(
 	}
 )
 
+// Cascade delete likes when a comment is deleted
+commentSchema.pre("findOneAndDelete", async function (next) {
+	const commentId = this.getQuery()["_id"]
+	await mongoose.model("Like").deleteMany({ comment: commentId })
+	next()
+})
+
 commentSchema.plugin(mongooseAggregatePaginate)
 
 export const Comment = mongoose.model("Comment", commentSchema)
