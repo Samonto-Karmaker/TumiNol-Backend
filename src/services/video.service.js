@@ -473,16 +473,19 @@ const getVideosByOwnerId = async (
 		}
 
 		const totalVideos = await Video.countDocuments(constrains)
+		const totalPages = Math.ceil(totalVideos / limit)
+		if (totalVideos === 0) {
+			return new PaginationResponseDTO([], totalVideos, totalPages, 0)
+		}
+		if (page > totalPages) {
+			throw new ApiError(400, "Invalid page value")
+		}
+
 		const videos = await Video.aggregate(
 			getVideoAggregate(constrains, sortBy, sortType, page, limit)
 		)
 
-		return {
-			videos,
-			totalVideos,
-			totalPages: Math.ceil(totalVideos / limit),
-			currentPage: page,
-		}
+		return new PaginationResponseDTO(videos, totalVideos, totalPages, page)
 	} catch (error) {
 		if (error instanceof ApiError) {
 			throw error
