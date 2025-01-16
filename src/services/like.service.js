@@ -1,6 +1,7 @@
 import { Like } from "../models/Like.js"
 import { Video } from "../models/Video.js"
 import { Post } from "../models/Post.js"
+import { Comment } from "../models/Comment.js"
 import ApiError from "../utils/ApiError.js"
 import { isValidObjectId } from "../utils/validateObjectId.js"
 import {

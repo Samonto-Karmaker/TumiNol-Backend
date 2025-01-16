@@ -1,6 +1,11 @@
 import asyncHandler from "../utils/asyncHandler.js"
 import ApiResponse from "../utils/ApiResponse.js"
-import { getLikedVideos, togglePostLike, toggleVideoLike } from "../services/like.service.js"
+import {
+	getLikedVideos,
+	togglePostLike,
+	toggleVideoLike,
+	toggleCommentLike,
+} from "../services/like.service.js"
 import { STANDARD_LIMIT_PER_PAGE } from "../constants.js"
 
 const toggleVideoLikeController = asyncHandler(async (req, res) => {
@@ -30,7 +35,9 @@ const getLikedVideosController = asyncHandler(async (req, res) => {
 	page = parseInt(page) || 1
 	limit = parseInt(limit) || STANDARD_LIMIT_PER_PAGE
 	const likedVideos = await getLikedVideos(userId, page, limit)
-	res.status(200).json(new ApiResponse(200, "Liked videos fetched", likedVideos))
+	res
+		.status(200)
+		.json(new ApiResponse(200, "Liked videos fetched", likedVideos))
 })
 
 export {
