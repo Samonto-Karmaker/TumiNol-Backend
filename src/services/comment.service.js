@@ -7,6 +7,7 @@ import {
 	HIGHEST_LIMIT_PER_PAGE,
 } from "../constants.js"
 import PaginationResponseDTO from "../DTOs/PaginationResponseDTO.js"
+import mongoose from "mongoose"
 
 const getVideoComments = async (
 	videoId,
@@ -39,7 +40,7 @@ const getVideoComments = async (
 
 		const comments = await Comment.aggregate([
 			{
-				$match: { video: videoId },
+				$match: { video: new mongoose.Types.ObjectId(videoId) },
 			},
 			{
 				$lookup: {
@@ -82,7 +83,9 @@ const getVideoComments = async (
 				},
 			},
 			{
-				$sort: { createAt: -1 },
+				$sort: {
+					["createdAt"]: -1,
+				},
 			},
 			{
 				$skip: (page - 1) * limit,
@@ -91,6 +94,8 @@ const getVideoComments = async (
 				$limit: limit,
 			},
 		])
+
+		console.log(comments)
 
 		return new PaginationResponseDTO(comments, totalComments, totalPages, page)
 	} catch (error) {
