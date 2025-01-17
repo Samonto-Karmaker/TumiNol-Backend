@@ -25,10 +25,12 @@ TumiNol-Backend is a prototype project of the backend of the famous video-sharin
 - Update thumbnail
 - Get individual, all and owner videos with sorting and pagination
 - Search, update, delete, and manage videos
-- Like management
+- Like/unlike videos, comments and posts
+- Get all liked videos
+- Add, update, and delete comments to videos
+- Get all comments of a video with pagination
 
 ### Planned Features
-- Comment management
 - Playlist management
 
 ## Installation
@@ -120,10 +122,18 @@ Here are some of the main API endpoints:
 
 - Like Routes:
     ```http
-    POST /api/v1/likes/video/:videoId - Toggle Like on Video
-    POST /api/v1/likes/post/:postId - Toggle Like on Post
-    POST /api/v1/likes/comment/:commentId - Toggle Like on Comment
-    GET /api/v1/likes/videos - Get Liked Videos with pagination
+    POST /api/v1/likes/video/:videoId - Toggle like on video
+    POST /api/v1/likes/post/:postId - Toggle like on post
+    POST /api/v1/likes/comment/:commentId - Toggle like on comment
+    GET /api/v1/likes/videos - Get liked videos with pagination
+    ```
+
+- Comment Routes:
+    ```http
+    POST /api/v1/comments/:videoId - Add comment to a video
+    GET /api/v1/comments/:videoId - Get comments for a video with pagination
+    PATCH /api/v1/comments/:commentId - Update comment
+    DELETE /api/v1/comments/:commentId - Delete a comment
     ```
 
 - Test Routes:
