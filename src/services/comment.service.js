@@ -67,6 +67,13 @@ const getVideoComments = async (
 					isLiked: {
 						$in: [accessingUserId, "$likes.owner"],
 					},
+					isEdited: {
+						$cond: {
+							if: { $ne: ["$createdAt", "$updatedAt"] },
+							then: true,
+							else: false,
+						}
+					},
 				},
 			},
 			{
@@ -75,6 +82,7 @@ const getVideoComments = async (
 					createdAt: 1,
 					likeCount: 1,
 					isLiked: 1,
+					isEdited: 1,
 					owner: {
 						_id: 1,
 						fullName: 1,
