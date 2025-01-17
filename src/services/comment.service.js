@@ -94,6 +94,7 @@ const getVideoComments = async (
 
 		return new PaginationResponseDTO(comments, totalComments, totalPages, page)
 	} catch (error) {
+		console.error("Failed to get comments: ", error)
 		if (error instanceof ApiError) {
 			throw error
 		}
@@ -130,6 +131,7 @@ const addComment = async (userId, videoId, comment) => {
 		await newComment.save()
 		return newComment
 	} catch (error) {
+		console.error("Failed to add comment: ", error)
 		if (error instanceof ApiError) {
 			throw error
 		}
@@ -168,6 +170,7 @@ const updateComment = async (userId, commentId, newComment) => {
 
 		return updatedComment
 	} catch (error) {
+		console.error("Failed to update comment: ", error)
 		if (error instanceof ApiError) {
 			throw error
 		}
@@ -193,6 +196,7 @@ const deleteComment = async (userId, commentId) => {
 		await Comment.findByIdAndDelete(commentId)
 		return true
 	} catch (error) {
+		console.error("Failed to delete comment: ", error)
 		if (error instanceof ApiError) {
 			throw error
 		}
