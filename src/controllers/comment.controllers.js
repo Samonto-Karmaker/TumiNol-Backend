@@ -1,6 +1,6 @@
 import asyncHandler from "../utils/asyncHandler.js"
 import ApiResponse from "../utils/ApiResponse.js"
-import { addComment } from "../services/comment.service.js"
+import { addComment, updateComment } from "../services/comment.service.js"
 
 const addCommentController = asyncHandler(async (req, res) => {
 	const videoId = req.params.videoId
@@ -10,4 +10,12 @@ const addCommentController = asyncHandler(async (req, res) => {
 	res.status(201).json(new ApiResponse(201, "Comment added", newComment))
 })
 
-export { addCommentController }
+const updateCommentController = asyncHandler(async (req, res) => {
+	const commentId = req.params.commentId
+	const userId = req.user._id
+	const newComment = req.body.comment
+	const updatedComment = await updateComment(userId, commentId, newComment)
+	res.status(200).json(new ApiResponse(200, "Comment updated", updatedComment))
+})
+
+export { addCommentController, updateCommentController }
