@@ -3,8 +3,10 @@ import ApiResponse from "../utils/ApiResponse.js"
 import {
 	addComment,
 	deleteComment,
+	getVideoComments,
 	updateComment,
 } from "../services/comment.service.js"
+import { STANDARD_LIMIT_PER_PAGE } from "../constants.js"
 
 const addCommentController = asyncHandler(async (req, res) => {
 	const videoId = req.params.videoId
@@ -29,8 +31,18 @@ const deleteCommentController = asyncHandler(async (req, res) => {
 	res.status(200).json(new ApiResponse(200, "Comment deleted"))
 })
 
+const getVideoCommentsController = asyncHandler(async (req, res) => {
+	const videoId = req.params.videoId
+	let { page, limit } = req.query
+	page = parseInt(page) || 1
+	limit = parseInt(limit) || STANDARD_LIMIT_PER_PAGE
+	const comments = await getVideoComments(videoId, req.user._id, page, limit)
+	res.status(200).json(new ApiResponse(200, "Comments retrieved", comments))
+})
+
 export {
 	addCommentController,
 	updateCommentController,
 	deleteCommentController,
+	getVideoCommentsController,
 }
