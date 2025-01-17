@@ -79,6 +79,29 @@ const updateComment = async (userId, commentId, newComment) => {
 	}
 }
 
-const deleteComment = async commentId => {}
+const deleteComment = async (userId, commentId) => {
+	if (!userId) {
+		throw new ApiError(400, "User ID is required")
+	}
+	if (!commentId || !isValidObjectId(commentId)) {
+		throw new ApiError(400, "Invalid comment ID")
+	}
+	try {
+		const comment = await Comment.findById(commentId).select("owner")
+		if (!comment) {
+			throw new ApiError(404, "Comment not found")
+		}
+		if (comment.owner.toString() !== userId.toString()) {
+			throw new ApiError(403, "You are not authorized to delete this comment")
+		}
+		await Comment.findByIdAndDelete(commentId)
+		return true
+	} catch (error) {
+		if (error instanceof ApiError) {
+			throw error
+		}
+		throw new ApiError(500, "Failed to delete comment")
+	}
+}
 
 export { getVideoComments, addComment, updateComment, deleteComment }
