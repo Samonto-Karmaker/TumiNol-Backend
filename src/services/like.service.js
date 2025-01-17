@@ -191,7 +191,7 @@ const getLikedVideos = async (
 			},
 			{
 				$sort: {
-					createdAt: -1,
+					["createdAt"]: -1,
 				},
 			},
 			{
