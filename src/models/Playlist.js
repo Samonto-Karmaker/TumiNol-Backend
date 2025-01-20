@@ -25,6 +25,10 @@ const playlistSchema = new mongoose.Schema(
 			required: [true, "description is required"],
 			trim: true,
 		},
+		isPublic: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	{
 		timestamps: true,

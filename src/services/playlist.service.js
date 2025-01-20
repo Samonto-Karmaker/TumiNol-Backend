@@ -18,6 +18,8 @@ const removeVideoFromPlaylist = async (userId, playlistId, videoId) => {}
 
 const deletePlaylist = async (userId, playlistId) => {}
 
+const togglePlaylistPrivacy = async (userId, playlistId) => {}
+
 export {
 	createPlaylist,
 	getPlaylistsByOwner,
@@ -27,4 +29,5 @@ export {
 	addVideoToPlaylist,
 	removeVideoFromPlaylist,
 	deletePlaylist,
+    togglePlaylistPrivacy,
 }
