@@ -17,7 +17,7 @@ const getPlaylistsByOwnerController = asyncHandler(async (req, res) => {
 	page = parseInt(page) || 1
 	limit = parseInt(limit) || STANDARD_LIMIT_PER_PAGE
 	const ownerId = req.params.ownerId
-	const playlists = await getPlaylistsByOwner(ownerId, page, limit)
+	const playlists = await getPlaylistsByOwner(ownerId, req.user._id, page, limit)
 	res.status(200).json(new ApiResponse(200, "Playlists fetched", playlists))
 })
 
