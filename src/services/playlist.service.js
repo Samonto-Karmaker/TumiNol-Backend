@@ -7,6 +7,7 @@ import {
 } from "../constants.js"
 import PaginationResponseDTO from "../DTOs/PaginationResponseDTO.js"
 import { User } from "../models/User.js"
+import mongoose from "mongoose"
 
 const createPlaylist = async (userId, { title, description }) => {
 	if (!userId) {
@@ -63,7 +64,7 @@ const getPlaylistsByOwner = async (
 		}
 
 		const constraints = {
-			owner: owner._id,
+			owner: new mongoose.Types.ObjectId(ownerId),
 		}
 		if (owner._id.toString() !== accessingUserId) {
 			constraints.isPublic = true
