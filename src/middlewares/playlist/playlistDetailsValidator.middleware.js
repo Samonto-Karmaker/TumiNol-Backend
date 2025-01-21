@@ -18,7 +18,7 @@ const playlistDetailsValidatorMiddleware = (req, res, next) => {
 	if (Object.keys(mappedErrors).length === 0) {
 		return next()
 	}
-	res.send(400).json(new ApiError(400, "Invalid playlist details", mappedErrors))
+	res.status(400).json(new ApiError(400, "Validation failed", mappedErrors))
 }
 
 export { playlistDetailsValidator, playlistDetailsValidatorMiddleware }

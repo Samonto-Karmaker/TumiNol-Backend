@@ -22,7 +22,7 @@ const videoDataValidatorMiddleware = (req, res, next) => {
 	if (req.files) {
 		deleteUploadedFiles(req.files)
 	}
-	res.send(400).json(new ApiError(400, "Invalid data", mappedErrors))
+	res.status(400).json(new ApiError(400, "Validation failed", mappedErrors))
 }
 
 export { videoDataValidator, videoDataValidatorMiddleware }
