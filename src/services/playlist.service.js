@@ -66,7 +66,7 @@ const getPlaylistsByOwner = async (
 		const constraints = {
 			owner: new mongoose.Types.ObjectId(ownerId),
 		}
-		if (owner._id.toString() !== accessingUserId) {
+		if (owner._id.toString() !== accessingUserId.toString()) {
 			constraints.isPublic = true
 		}
 		const playlists = await Playlist.aggregate([
