@@ -6,7 +6,7 @@ import {
 } from "../middlewares/playlist/playlistDetailsValidator.middleware.js"
 import {
 	createPlaylistController,
-	getPlaylistsByOwnerController,
+	getPlaylistsByOwnerIdController,
 } from "../controllers/playlist.controllers.js"
 
 const playlistRouter = Router()
@@ -20,6 +20,6 @@ playlistRouter.post(
 	createPlaylistController
 )
 
-playlistRouter.get("/:ownerId", getPlaylistsByOwnerController)
+playlistRouter.get("/channel/:ownerId", getPlaylistsByOwnerIdController)
 
 export default playlistRouter

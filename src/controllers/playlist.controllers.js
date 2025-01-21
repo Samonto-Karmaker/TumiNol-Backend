@@ -2,7 +2,7 @@ import asyncHandler from "../utils/asyncHandler.js"
 import ApiResponse from "../utils/ApiResponse.js"
 import {
 	createPlaylist,
-	getPlaylistsByOwner,
+	getPlaylistsByOwnerId,
 } from "../services/playlist.service.js"
 import { STANDARD_LIMIT_PER_PAGE } from "../constants.js"
 
@@ -12,13 +12,18 @@ const createPlaylistController = asyncHandler(async (req, res) => {
 	res.status(201).json(new ApiResponse(201, "Playlist created", newPlaylist))
 })
 
-const getPlaylistsByOwnerController = asyncHandler(async (req, res) => {
+const getPlaylistsByOwnerIdController = asyncHandler(async (req, res) => {
 	let { page, limit } = req.query
 	page = parseInt(page) || 1
 	limit = parseInt(limit) || STANDARD_LIMIT_PER_PAGE
 	const ownerId = req.params.ownerId
-	const playlists = await getPlaylistsByOwner(ownerId, req.user._id, page, limit)
+	const playlists = await getPlaylistsByOwnerId(
+		ownerId,
+		req.user._id,
+		page,
+		limit
+	)
 	res.status(200).json(new ApiResponse(200, "Playlists fetched", playlists))
 })
 
-export { createPlaylistController, getPlaylistsByOwnerController }
+export { createPlaylistController, getPlaylistsByOwnerIdController }
