@@ -35,11 +35,15 @@ const createPlaylist = async (userId, { title, description }) => {
 
 const getPlaylistsByOwner = async (
 	ownerId,
+	accessingUserId,
 	page = 1,
 	limit = STANDARD_LIMIT_PER_PAGE
 ) => {
 	if (!ownerId || isValidObjectId(ownerId)) {
 		throw new ApiError(400, "Invalid ownerId")
+	}
+	if (!accessingUserId) {
+		throw new ApiError(400, "Invalid accessingUserId")
 	}
 	if (page < 1 || limit < 1 || limit > HIGHEST_LIMIT_PER_PAGE) {
 		throw new ApiError(400, "Invalid page or limit")
@@ -57,12 +61,78 @@ const getPlaylistsByOwner = async (
 		if (page > totalPages) {
 			throw new ApiError(400, "Invalid page value")
 		}
-		const playlists = await Playlist.find({ owner: ownerId })
-			.skip((page - 1) * limit)
-			.limit(limit)
-			.sort({ createdAt: -1 })
-			.populate("owner", "_id avatar fullName")
-			.populate("videos", "_id title thumbnail")
+
+		const constraints = {
+			owner: owner._id,
+		}
+		if (owner._id.toString() !== accessingUserId) {
+			constraints.isPublic = true
+		}
+		const playlists = await Playlist.aggregate([
+			{
+				$match: constraints,
+			}, 
+			{
+				$lookup: {
+					from: "users",
+					localField: "owner",
+					foreignField: "_id",
+					as: "owner"
+				}
+			}, 
+			{
+				$unwind: "$owner"
+			},
+			{
+				$lookup: {
+					from: "videos",
+					localField: "videos",
+					foreignField: "_id",
+					as: "videos"
+				}
+			},
+			{
+				$unwind: "$videos"
+			},
+			{
+				$match: {
+					"videos.isPublished": true
+				}
+			},
+			{
+				$group: {
+					_id: "$_id",
+					videos: { $push: "$videos" }
+				}
+			},
+			{
+				$project: {
+					_id: 1,
+					title: 1,
+					description: 1,
+					owner: {
+						_id: 1,
+						fullName: 1,
+						avatar: 1,
+					},
+					videos: {
+						_id: 1,
+						title: 1,
+						thumbnail: 1,
+					},
+					createdAt: 1,
+				}
+			},
+			{
+				$sort: { createdAt: -1 }
+			},
+			{
+				$skip: (page - 1) * limit
+			},
+			{
+				$limit: limit
+			}
+		])
 
 		return new PaginationResponseDTO(
 			playlists,
