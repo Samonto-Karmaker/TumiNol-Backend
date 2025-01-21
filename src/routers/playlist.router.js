@@ -4,16 +4,22 @@ import {
 	playlistDetailsValidator,
 	playlistDetailsValidatorMiddleware,
 } from "../middlewares/playlist/playlistDetailsValidator.middleware.js"
-import { createPlaylistController } from "../controllers/playlist.controllers.js"
+import {
+	createPlaylistController,
+	getPlaylistsByOwnerController,
+} from "../controllers/playlist.controllers.js"
 
 const playlistRouter = Router()
 
+playlistRouter.use(checkAuth)
+
 playlistRouter.post(
 	"/",
-	checkAuth,
 	playlistDetailsValidator,
 	playlistDetailsValidatorMiddleware,
 	createPlaylistController
 )
+
+playlistRouter.get("/:ownerId", getPlaylistsByOwnerController)
 
 export default playlistRouter
