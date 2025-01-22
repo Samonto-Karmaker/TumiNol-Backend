@@ -7,7 +7,7 @@ import {
 } from "../constants.js"
 import PaginationResponseDTO from "../DTOs/PaginationResponseDTO.js"
 import { User } from "../models/User.js"
-import mongoose from "mongoose"
+import { Video } from "../models/Video.js"
 
 const createPlaylist = async (userId, { title, description }) => {
 	if (!userId) {
@@ -164,7 +164,45 @@ const searchPlaylistsByTitle = async (searchQuery, page, limit) => {}
 
 const updatePlaylistDetails = async (userId, playlistId, playlistDetails) => {}
 
-const addVideoToPlaylist = async (userId, playlistId, videoId) => {}
+const addVideoToPlaylist = async (userId, playlistId, videoId) => {
+	if (!userId) {
+		throw new ApiError(400, "User ID is required")
+	}
+	if (!playlistId || !isValidObjectId(playlistId)) {
+		throw new ApiError(400, "Invalid playlistId")
+	}
+	if (!videoId || !isValidObjectId(videoId)) {
+		throw new ApiError(400, "Invalid videoId")
+	}
+	try {
+		const playlist = await Playlist.findById(playlistId)
+		if (!playlist) {
+			throw new ApiError(404, "Playlist not found")
+		}
+		if (playlist.owner.toString() !== userId.toString()) {
+			throw new ApiError(403, "Forbidden")
+		}
+		const video = await Video.findById(videoId).select("_id isPublished")
+		if (!video) {
+			throw new ApiError(404, "Video not found")
+		}
+		if (!video.isPublished) {
+			throw new ApiError(400, "Video is not published")
+		}
+		if (playlist.videos.includes(video._id)) {
+			throw new ApiError(400, "Video already in playlist")
+		}
+		playlist.videos.push(video._id)
+		await playlist.save()
+		return playlist
+	} catch (error) {
+		console.error("Failed to add video to playlist:", error)
+		if (error instanceof ApiError) {
+			throw error
+		}
+		throw new ApiError(500, "Internal Server Error")
+	}
+}
 
 const removeVideoFromPlaylist = async (userId, playlistId, videoId) => {}
 
