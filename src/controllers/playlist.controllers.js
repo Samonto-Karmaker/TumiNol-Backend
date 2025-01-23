@@ -1,6 +1,7 @@
 import asyncHandler from "../utils/asyncHandler.js"
 import ApiResponse from "../utils/ApiResponse.js"
 import {
+	addVideoToPlaylist,
 	createPlaylist,
 	getPlaylistsByOwnerId,
 } from "../services/playlist.service.js"
@@ -24,6 +25,16 @@ const getPlaylistsByOwnerIdController = asyncHandler(async (req, res) => {
 		limit
 	)
 	res.status(200).json(new ApiResponse(200, "Playlists fetched", playlists))
+})
+
+const addVideoToPlaylistController = asyncHandler(async (req, res) => {
+	const { videoId } = req.body
+	const { playlistId } = req.params
+	const userId = req.user._id
+	const playlist = await addVideoToPlaylist(userId, playlistId, videoId)
+	res
+		.status(200)
+		.json(new ApiResponse(200, "Video added to playlist", playlist))
 })
 
 export { createPlaylistController, getPlaylistsByOwnerIdController }
