@@ -4,6 +4,7 @@ import {
 	addVideoToPlaylist,
 	createPlaylist,
 	getPlaylistsByOwnerId,
+	removeVideoFromPlaylist,
 } from "../services/playlist.service.js"
 import { STANDARD_LIMIT_PER_PAGE } from "../constants.js"
 
@@ -37,8 +38,19 @@ const addVideoToPlaylistController = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "Video added to playlist", playlist))
 })
 
+const removeVideoFromPlaylistController = asyncHandler(async (req, res) => {
+	const { videoId } = req.body
+	const { playlistId } = req.params
+	const userId = req.user._id
+	const playlist = await removeVideoFromPlaylist(userId, playlistId, videoId)
+	res
+		.status(200)
+		.json(new ApiResponse(200, "Video removed from playlist", playlist))
+})
+
 export {
 	createPlaylistController,
 	getPlaylistsByOwnerIdController,
 	addVideoToPlaylistController,
+	removeVideoFromPlaylistController,
 }
