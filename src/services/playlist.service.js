@@ -204,7 +204,44 @@ const addVideoToPlaylist = async (userId, playlistId, videoId) => {
 	}
 }
 
-const removeVideoFromPlaylist = async (userId, playlistId, videoId) => {}
+const removeVideoFromPlaylist = async (userId, playlistId, videoId) => {
+	if (!userId) {
+		throw new ApiError(400, "User ID is required")
+	}
+	if (!playlistId || !isValidObjectId(playlistId)) {
+		throw new ApiError(400, "Invalid playlistId")
+	}
+	if (!videoId || !isValidObjectId(videoId)) {
+		throw new ApiError(400, "Invalid videoId")
+	}
+	try {
+		const playlist = await Playlist.findById(playlistId)
+		if (!playlist) {
+			throw new ApiError(404, "Playlist not found")
+		}
+		if (playlist.owner.toString() !== userId.toString()) {
+			throw new ApiError(403, "Forbidden")
+		}
+		const video = await Video.findById(videoId).select("_id")
+		if (!video) {
+			throw new ApiError(404, "Video not found")
+		}
+		if (!playlist.videos.includes(video._id)) {
+			throw new ApiError(400, "Video not in playlist")
+		}
+		playlist.videos = playlist.videos.filter(
+			videoId => videoId.toString() !== video._id.toString()
+		)
+		await playlist.save()
+		return playlist
+	} catch (error) {
+		console.error("Failed to remove video from playlist:", error)
+		if (error instanceof ApiError) {
+			throw error
+		}
+		throw new ApiError(500, "Internal Server Error")
+	}
+}
 
 const deletePlaylist = async (userId, playlistId) => {}
 
