@@ -162,7 +162,47 @@ const getPlaylistById = async playlistId => {}
 
 const searchPlaylistsByTitle = async (searchQuery, page, limit) => {}
 
-const updatePlaylistDetails = async (userId, playlistId, playlistDetails) => {}
+const updatePlaylistDetails = async (userId, playlistId, playlistDetails) => {
+	if (!userId) {
+		throw new ApiError(400, "User ID is required")
+	}
+	if (!playlistId || !isValidObjectId(playlistId)) {
+		throw new ApiError(400, "Invalid playlistId")
+	}
+
+	try {
+		const playlist = await Playlist.findById(playlistId)
+		if (!playlist) {
+			throw new ApiError(404, "Playlist not found")
+		}
+		if (playlist.owner.toString() !== userId.toString()) {
+			throw new ApiError(403, "Forbidden")
+		}
+		const updatedDetails = {}
+		if (playlistDetails.title?.trim() !== "") {
+			updatedDetails.title = playlistDetails.title
+		}
+		if (playlistDetails.description?.trim() !== "") {
+			updatedDetails.description = playlistDetails.description
+		}
+		if (Object.keys(updatedDetails).length === 0) {
+			throw new ApiError(400, "No valid fields to update")
+		}
+		const updatedPlaylist = await Playlist.findByIdAndUpdate(
+			playlistId,
+			{ $set: updatedDetails },
+			{ new: true, runValidators: true }
+		).select("_id title description")
+
+		return updatedPlaylist
+	} catch (error) {
+		console.error("Failed to update playlist details:", error)
+		if (error instanceof ApiError) {
+			throw error
+		}
+		throw new ApiError(500, "Internal Server Error")
+	}
+}
 
 const addVideoToPlaylist = async (userId, playlistId, videoId) => {
 	if (!userId) {
