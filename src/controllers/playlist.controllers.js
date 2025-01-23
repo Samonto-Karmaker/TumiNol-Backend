@@ -5,6 +5,7 @@ import {
 	createPlaylist,
 	getPlaylistsByOwnerId,
 	removeVideoFromPlaylist,
+	togglePlaylistPrivacy,
 } from "../services/playlist.service.js"
 import { STANDARD_LIMIT_PER_PAGE } from "../constants.js"
 
