@@ -8,6 +8,7 @@ import {
 	addVideoToPlaylistController,
 	createPlaylistController,
 	getPlaylistsByOwnerIdController,
+	removeVideoFromPlaylistController,
 } from "../controllers/playlist.controllers.js"
 
 const playlistRouter = Router()
@@ -23,6 +24,9 @@ playlistRouter.post(
 
 playlistRouter.get("/channel/:ownerId", getPlaylistsByOwnerIdController)
 
-playlistRouter.route("/video/:playlistId").post(addVideoToPlaylistController)
+playlistRouter
+	.route("/video/:playlistId")
+	.post(addVideoToPlaylistController)
+	.patch(removeVideoFromPlaylistController)
 
 export default playlistRouter
