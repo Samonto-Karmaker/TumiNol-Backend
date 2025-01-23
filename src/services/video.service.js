@@ -76,6 +76,10 @@ const getVideoAggregate = (match, sortBy, sortType, page, limit) => [
 
 // files contains the video file and thumbnail file
 const publishVideo = async (userId, title, description, files) => {
+	if (!title || !description) {
+		throw new ApiError(400, "Title and description are required")
+	}
+	
 	const videoFilePath = files?.video?.[0]?.path
 	const thumbnailFilePath = files?.thumbnail?.[0]?.path
 	if (!videoFilePath || !thumbnailFilePath) {

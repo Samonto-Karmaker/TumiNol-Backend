@@ -50,7 +50,11 @@ videoRouter
 videoRouter.route("/publish/:videoId").patch(togglePublishStatusController)
 videoRouter
 	.route("/update-details/:videoId")
-	.patch(updateVideoDetailsController)
+	.patch(
+		videoDataValidator,
+		videoDataValidatorMiddleware,
+		updateVideoDetailsController
+	)
 videoRouter
 	.route("/update-thumbnail/:videoId")
 	.patch(upload.single("thumbnail"), updateVideoThumbnailController)
