@@ -3,10 +3,12 @@ import ApiError from "../../utils/ApiError.js"
 
 const playlistDetailsValidator = [
 	check("title")
+		.optional()
 		.isLength({ min: 3, max: 100 })
 		.withMessage("Title should be between 3 to 100 characters")
 		.trim(),
 	check("description")
+		.optional()
 		.isLength({ min: 3, max: 1000 })
 		.withMessage("Description should be between 3 to 1000 characters")
 		.trim(),
