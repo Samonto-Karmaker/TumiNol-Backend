@@ -245,7 +245,33 @@ const removeVideoFromPlaylist = async (userId, playlistId, videoId) => {
 
 const deletePlaylist = async (userId, playlistId) => {}
 
-const togglePlaylistPrivacy = async (userId, playlistId) => {}
+const togglePlaylistPrivacy = async (userId, playlistId) => {
+	if (!userId) {
+		throw new ApiError(400, "User ID is required")
+	}
+	if (!playlistId || !isValidObjectId(playlistId)) {
+		throw new ApiError(400, "Invalid playlistId")
+	}
+
+	try {
+		const playlist = await Playlist.findById(playlistId)
+		if (!playlist) {
+			throw new ApiError(404, "Playlist not found")
+		}
+		if (playlist.owner.toString() !== userId.toString()) {
+			throw new ApiError(403, "Forbidden")
+		}
+		playlist.isPublic = !playlist.isPublic
+		await playlist.save()
+		return playlist
+	} catch (error) {
+		console.error("Failed to toggle playlist privacy:", error)
+		if (error instanceof ApiError) {
+			throw error
+		}
+		throw new ApiError(500, "Internal Server Error")
+	}
+}
 
 export {
 	createPlaylist,
