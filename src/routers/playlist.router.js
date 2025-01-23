@@ -5,6 +5,7 @@ import {
 	playlistDetailsValidatorMiddleware,
 } from "../middlewares/playlist/playlistDetailsValidator.middleware.js"
 import {
+	addVideoToPlaylistController,
 	createPlaylistController,
 	getPlaylistsByOwnerIdController,
 } from "../controllers/playlist.controllers.js"
@@ -21,5 +22,7 @@ playlistRouter.post(
 )
 
 playlistRouter.get("/channel/:ownerId", getPlaylistsByOwnerIdController)
+
+playlistRouter.route("/video/:playlistId").post(addVideoToPlaylistController)
 
 export default playlistRouter

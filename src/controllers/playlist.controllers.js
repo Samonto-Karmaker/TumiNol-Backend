@@ -37,4 +37,8 @@ const addVideoToPlaylistController = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "Video added to playlist", playlist))
 })
 
-export { createPlaylistController, getPlaylistsByOwnerIdController }
+export {
+	createPlaylistController,
+	getPlaylistsByOwnerIdController,
+	addVideoToPlaylistController,
+}
