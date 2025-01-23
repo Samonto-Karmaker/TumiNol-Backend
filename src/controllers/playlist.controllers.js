@@ -3,6 +3,7 @@ import ApiResponse from "../utils/ApiResponse.js"
 import {
 	addVideoToPlaylist,
 	createPlaylist,
+	deletePlaylist,
 	getPlaylistsByOwnerId,
 	removeVideoFromPlaylist,
 	togglePlaylistPrivacy,
@@ -63,10 +64,18 @@ const togglePlaylistPrivacyController = asyncHandler(async (req, res) => {
 		)
 })
 
+const deletePlaylistController = asyncHandler(async (req, res) => {
+	const { playlistId } = req.params
+	const userId = req.user._id
+	await deletePlaylist(userId, playlistId)
+	res.status(200).json(new ApiResponse(200, "Playlist deleted"))
+})
+
 export {
 	createPlaylistController,
 	getPlaylistsByOwnerIdController,
 	addVideoToPlaylistController,
 	removeVideoFromPlaylistController,
 	togglePlaylistPrivacyController,
+	deletePlaylistController,
 }
