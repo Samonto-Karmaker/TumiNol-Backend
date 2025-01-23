@@ -48,9 +48,19 @@ const removeVideoFromPlaylistController = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "Video removed from playlist", playlist))
 })
 
+const togglePlaylistPrivacyController = asyncHandler(async (req, res) => {
+	const { playlistId } = req.params
+	const userId = req.user._id
+	const playlist = await togglePlaylistPrivacy(userId, playlistId)
+	res
+		.status(200)
+		.json(new ApiResponse(200, "Playlist privacy updated", playlist))
+})
+
 export {
 	createPlaylistController,
 	getPlaylistsByOwnerIdController,
 	addVideoToPlaylistController,
 	removeVideoFromPlaylistController,
+	togglePlaylistPrivacyController,
 }
