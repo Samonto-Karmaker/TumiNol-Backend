@@ -263,7 +263,7 @@ const togglePlaylistPrivacy = async (userId, playlistId) => {
 		}
 		playlist.isPublic = !playlist.isPublic
 		await playlist.save()
-		return playlist
+		return playlist.isPublic
 	} catch (error) {
 		console.error("Failed to toggle playlist privacy:", error)
 		if (error instanceof ApiError) {

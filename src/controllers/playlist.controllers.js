@@ -52,10 +52,15 @@ const removeVideoFromPlaylistController = asyncHandler(async (req, res) => {
 const togglePlaylistPrivacyController = asyncHandler(async (req, res) => {
 	const { playlistId } = req.params
 	const userId = req.user._id
-	const playlist = await togglePlaylistPrivacy(userId, playlistId)
+	const privacy = await togglePlaylistPrivacy(userId, playlistId)
 	res
 		.status(200)
-		.json(new ApiResponse(200, "Playlist privacy updated", playlist))
+		.json(
+			new ApiResponse(
+				200,
+				privacy ? "Playlist is now public" : "Playlist is now private"
+			)
+		)
 })
 
 export {
