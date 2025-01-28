@@ -42,7 +42,30 @@ const uploadOnCloudinary = async (localFilePath, isVideo = false) => {
 			For now, I will just log the generated m3u8 files in the console and store the URL of the video
 			TODO: Find out how to store and use the generated m3u8 files in the frontend
 		*/
-		const response = await cloudinary.uploader.upload(localFilePath, options)
+		let response
+		if (isVideo) {
+			/* 	You need to use custom promise to handle large file uploads using upload_large method
+				The upload_large method is used to upload large files to Cloudinary in smaller chunks
+				This method is useful when you want to upload large files that are larger than 100MB
+				It is much more reliable than uploading large files in a single request
+			*/
+			response = await new Promise((resolve, reject) => {
+				cloudinary.uploader.upload_large(
+					localFilePath,
+					options,
+					(error, result) => {
+						if (error) {
+							console.error(error)
+							reject(null)
+						} else {
+							resolve(result)
+						}
+					}
+				)
+			})
+		} else {
+			response = await cloudinary.uploader.upload(localFilePath, options)
+		}
 		console.log(`File uploaded successfully: ${response.url}`)
 		if (isVideo) {
 			console.log("Generated m3u8 files:")
@@ -54,9 +77,17 @@ const uploadOnCloudinary = async (localFilePath, isVideo = false) => {
 		console.error(error)
 		return null
 	} finally {
-		fs.unlink(localFilePath, err => {
-			if (err) {
-				console.error(err)
+		// Delete the local file after uploading it to cloudinary if it exists
+		fs.access(localFilePath, fs.constants.F_OK, err => {
+			if (!err) {
+				fs.unlink(localFilePath, err => {
+					if (err) {
+						console.error(`Error deleting file: ${localFilePath}`)
+						console.error(err)
+					} else {
+						console.log(`File deleted successfully: ${localFilePath}`)
+					}
+				})
 			}
 		})
 	}
