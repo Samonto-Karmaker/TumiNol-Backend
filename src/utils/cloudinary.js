@@ -31,6 +31,7 @@ const uploadOnCloudinary = async (localFilePath, isVideo = false) => {
 				{ streaming_profile: "hd", format: "m3u8" }, // hd: high definition for medium bandwidth
 				{ streaming_profile: "full_hd", format: "m3u8" }, // full_hd: full high definition for high bandwidth
 			]
+			options.eager_async = true // Process the eager transformations asynchronously making the upload faster
 		}
 		/*
 			The code does work and different streaming profiles are generated for the video
