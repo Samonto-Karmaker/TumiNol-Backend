@@ -8,7 +8,83 @@ import {
 import PaginationResponseDTO from "../DTOs/PaginationResponseDTO.js"
 import { User } from "../models/User.js"
 import { Video } from "../models/Video.js"
+import escape from "../utils/escape.js"
 
+// Helper functions
+const getPlaylistsAggregate = (constraints, page, limit) => [
+	{
+		$match: constraints,
+	},
+	{
+		$lookup: {
+			from: "users",
+			localField: "owner",
+			foreignField: "_id",
+			as: "owner",
+		},
+	},
+	{
+		$unwind: "$owner",
+	},
+	{
+		$lookup: {
+			from: "videos",
+			localField: "videos",
+			foreignField: "_id",
+			as: "videos",
+		},
+	},
+	{
+		$unwind: {
+			path: "$videos",
+			preserveNullAndEmptyArrays: true,
+		},
+	},
+	{
+		$match: {
+			$or: [{ "videos.isPublished": true }, { videos: { $exists: false } }],
+		},
+	},
+	{
+		$group: {
+			_id: "$_id",
+			videos: { $push: "$videos" },
+			title: { $first: "$title" },
+			description: { $first: "$description" },
+			owner: { $first: "$owner" },
+			createdAt: { $first: "$createdAt" },
+		},
+	},
+	{
+		$project: {
+			_id: 1,
+			title: 1,
+			description: 1,
+			owner: {
+				_id: 1,
+				fullName: 1,
+				avatar: 1,
+			},
+			videos: {
+				_id: 1,
+				title: 1,
+				thumbnail: 1,
+			},
+			createdAt: 1,
+		},
+	},
+	{
+		$sort: { createdAt: -1 },
+	},
+	{
+		$skip: (page - 1) * limit,
+	},
+	{
+		$limit: limit,
+	},
+]
+
+// Service functions
 const createPlaylist = async (userId, { title, description }) => {
 	if (!userId) {
 		throw new ApiError(400, "User ID is required")
@@ -70,78 +146,9 @@ const getPlaylistsByOwnerId = async (
 			throw new ApiError(400, "Invalid page value")
 		}
 
-		const playlists = await Playlist.aggregate([
-			{
-				$match: constraints,
-			},
-			{
-				$lookup: {
-					from: "users",
-					localField: "owner",
-					foreignField: "_id",
-					as: "owner",
-				},
-			},
-			{
-				$unwind: "$owner",
-			},
-			{
-				$lookup: {
-					from: "videos",
-					localField: "videos",
-					foreignField: "_id",
-					as: "videos",
-				},
-			},
-			{
-				$unwind: {
-					path: "$videos",
-					preserveNullAndEmptyArrays: true,
-				},
-			},
-			{
-				$match: {
-					$or: [{ "videos.isPublished": true }, { videos: { $exists: false } }],
-				},
-			},
-			{
-				$group: {
-					_id: "$_id",
-					videos: { $push: "$videos" },
-					title: { $first: "$title" },
-					description: { $first: "$description" },
-					owner: { $first: "$owner" },
-					createdAt: { $first: "$createdAt" },
-				},
-			},
-			{
-				$project: {
-					_id: 1,
-					title: 1,
-					description: 1,
-					owner: {
-						_id: 1,
-						fullName: 1,
-						avatar: 1,
-					},
-					videos: {
-						_id: 1,
-						title: 1,
-						thumbnail: 1,
-					},
-					createdAt: 1,
-				},
-			},
-			{
-				$sort: { createdAt: -1 },
-			},
-			{
-				$skip: (page - 1) * limit,
-			},
-			{
-				$limit: limit,
-			},
-		])
+		const playlists = await Playlist.aggregate(
+			getPlaylistsAggregate(constraints, page, limit)
+		)
 
 		return new PaginationResponseDTO(
 			playlists,
@@ -160,7 +167,49 @@ const getPlaylistsByOwnerId = async (
 
 const getPlaylistById = async playlistId => {}
 
-const searchPlaylistsByTitle = async (searchQuery, page, limit) => {}
+const searchPlaylistsByTitle = async (
+	searchQuery,
+	page = 1,
+	limit = STANDARD_LIMIT_PER_PAGE
+) => {
+	if (!searchQuery) {
+		throw new ApiError(400, "Search query is required")
+	}
+	if (page < 1 || limit < 1 || limit > HIGHEST_LIMIT_PER_PAGE) {
+		throw new ApiError(400, "Invalid page or limit")
+	}
+	try {
+		const constraints = {
+			title: { $regex: escape(searchQuery), $options: "i" },
+			isPublic: true,
+		}
+		const totalPlaylists = await Playlist.countDocuments(constraints)
+		const totalPages = Math.ceil(totalPlaylists / limit)
+		if (totalPlaylists === 0) {
+			return new PaginationResponseDTO([], totalPlaylists, totalPages, 0)
+		}
+		if (page > totalPages) {
+			throw new ApiError(400, "Invalid page value")
+		}
+
+		const playlists = await Playlist.aggregate(
+			getPlaylistsAggregate(constraints, page, limit)
+		)
+
+		return new PaginationResponseDTO(
+			playlists,
+			totalPlaylists,
+			totalPages,
+			page
+		)
+	} catch (error) {
+		console.error("Failed to search playlists by title:", error)
+		if (error instanceof ApiError) {
+			throw error
+		}
+		throw new ApiError(500, "Internal Server Error")
+	}
+}
 
 const updatePlaylistDetails = async (userId, playlistId, playlistDetails) => {
 	if (!userId) {
