@@ -10,6 +10,7 @@ import {
 	deletePlaylistController,
 	getPlaylistsByOwnerIdController,
 	removeVideoFromPlaylistController,
+	searchPlaylistsByTitleController,
 	togglePlaylistPrivacyController,
 } from "../controllers/playlist.controllers.js"
 
@@ -34,5 +35,7 @@ playlistRouter
 playlistRouter.patch("/privacy/:playlistId", togglePlaylistPrivacyController)
 
 playlistRouter.route("/:playlistId").delete(deletePlaylistController)
+
+playlistRouter.get("/search", searchPlaylistsByTitleController)
 
 export default playlistRouter
