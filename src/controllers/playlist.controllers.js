@@ -6,6 +6,7 @@ import {
 	deletePlaylist,
 	getPlaylistsByOwnerId,
 	removeVideoFromPlaylist,
+	searchPlaylistsByTitle,
 	togglePlaylistPrivacy,
 } from "../services/playlist.service.js"
 import { STANDARD_LIMIT_PER_PAGE } from "../constants.js"
@@ -71,6 +72,15 @@ const deletePlaylistController = asyncHandler(async (req, res) => {
 	res.status(200).json(new ApiResponse(200, "Playlist deleted"))
 })
 
+const searchPlaylistsByTitleController = asyncHandler(async (req, res) => {
+	let { page, limit } = req.query
+	page = parseInt(page) || 1
+	limit = parseInt(limit) || STANDARD_LIMIT_PER_PAGE
+	const { searchQuery } = req.query
+	const playlists = await searchPlaylistsByTitle(searchQuery, page, limit)
+	res.status(200).json(new ApiResponse(200, "Playlists fetched", playlists))
+})
+
 export {
 	createPlaylistController,
 	getPlaylistsByOwnerIdController,
@@ -78,4 +88,5 @@ export {
 	removeVideoFromPlaylistController,
 	togglePlaylistPrivacyController,
 	deletePlaylistController,
+	searchPlaylistsByTitleController,
 }
