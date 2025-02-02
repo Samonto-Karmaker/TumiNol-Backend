@@ -9,6 +9,7 @@ import PaginationResponseDTO from "../DTOs/PaginationResponseDTO.js"
 import { User } from "../models/User.js"
 import { Video } from "../models/Video.js"
 import escape from "../utils/escape.js"
+import mongoose from "mongoose"
 
 // Helper functions
 const getPlaylistsAggregate = (constraints, page, limit) => [
@@ -165,6 +166,7 @@ const getPlaylistsByOwnerId = async (
 	}
 }
 
+// TODO: Issue in the case of playlist having only 1 video with no video access
 const getPlaylistById = async (
 	playlistId,
 	accessingUserId,
@@ -182,7 +184,7 @@ const getPlaylistById = async (
 	}
 	try {
 		const constraints = {
-			_id: playlistId,
+			_id: new mongoose.Types.ObjectId(playlistId),
 		}
 		let playlist =
 			await Playlist.findById(playlistId).select("_id owner videos")
@@ -199,7 +201,7 @@ const getPlaylistById = async (
 			throw new ApiError(400, "Invalid page value")
 		}
 
-		playlist = await Playlist.aggregate([
+		const initialPlaylist = [
 			{
 				$match: constraints,
 			},
@@ -228,6 +230,31 @@ const getPlaylistById = async (
 					as: "videos",
 				},
 			},
+			{
+				/*
+					Why $filter videos here? Why not $match in the previous stage?
+					Because we may have playlist with no videos, which is a valid case
+					We want to keep those playlists in the result
+					if we use $match, it will remove those playlists
+				*/
+				$set: {
+					videos: {
+						$filter: {
+							input: "$videos",
+							as: "video",
+							cond: {
+								$or: [
+									{ $eq: ["$$video.owner", accessingUserId] },
+									{ $eq: ["$$video.isPublished", true] },
+								],
+							},
+						},
+					},
+				},
+			},
+		]
+
+		const videoProcessing = [
 			{
 				$unwind: {
 					path: "$videos",
@@ -259,28 +286,6 @@ const getPlaylistById = async (
 				},
 			},
 			{
-				/* 	
-					Why $filter videos here? Why not $match in the previous stage?
-					Because we may have playlist with no videos, which is a valid case
-					We want to keep those playlists in the result
-					if we use $match, it will remove those playlists
-				*/
-				$set: {
-					videos: {
-						$filter: {
-							input: "$videos",
-							as: "video",
-							cond: {
-								$or: [
-									{ $eq: ["$$video.owner._id", accessingUserId] },
-									{ $eq: ["$$video.isPublished", true] },
-								],
-							},
-						},
-					},
-				},
-			},
-			{
 				$skip: (page - 1) * limit,
 			},
 			{
@@ -296,6 +301,9 @@ const getPlaylistById = async (
 					createdAt: { $first: "$createdAt" },
 				},
 			},
+		]
+
+		const projection = [
 			{
 				$project: {
 					_id: 1,
@@ -322,7 +330,17 @@ const getPlaylistById = async (
 					createdAt: 1,
 				},
 			},
-		])
+		]
+
+		if (totalVideos > 0) {
+			playlist = await Playlist.aggregate([
+				...initialPlaylist,
+				...videoProcessing,
+				...projection,
+			])
+		} else {
+			playlist = await Playlist.aggregate([...initialPlaylist, ...projection])
+		}
 
 		return new PaginationResponseDTO(playlist[0], totalVideos, totalPages, page)
 	} catch (error) {
