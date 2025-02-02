@@ -165,7 +165,174 @@ const getPlaylistsByOwnerId = async (
 	}
 }
 
-const getPlaylistById = async playlistId => {}
+const getPlaylistById = async (
+	playlistId,
+	accessingUserId,
+	page = 1,
+	limit = STANDARD_LIMIT_PER_PAGE
+) => {
+	if (!playlistId || !isValidObjectId(playlistId)) {
+		throw new ApiError(400, "Invalid playlistId")
+	}
+	if (!accessingUserId) {
+		throw new ApiError(400, "Invalid accessingUserId")
+	}
+	if (page < 1 || limit < 1 || limit > HIGHEST_LIMIT_PER_PAGE) {
+		throw new ApiError(400, "Invalid page or limit")
+	}
+	try {
+		const constraints = {
+			_id: playlistId,
+		}
+		let playlist =
+			await Playlist.findById(playlistId).select("_id owner videos")
+		if (!playlist) {
+			throw new ApiError(404, "Playlist not found")
+		}
+		if (playlist.owner.toString() !== accessingUserId.toString()) {
+			constraints.isPublic = true
+		}
+
+		const totalVideos = playlist.videos.length
+		const totalPages = totalVideos > 0 ? Math.ceil(totalVideos / limit) : 1
+		if (page > totalPages) {
+			throw new ApiError(400, "Invalid page value")
+		}
+
+		playlist = await Playlist.aggregate([
+			{
+				$match: constraints,
+			},
+			{
+				$lookup: {
+					from: "users",
+					localField: "owner",
+					foreignField: "_id",
+					as: "owner",
+				},
+			},
+			{
+				$unwind: "$owner",
+			},
+			{
+				$unwind: {
+					path: "$videos",
+					preserveNullAndEmptyArrays: true,
+				},
+			},
+			{
+				$lookup: {
+					from: "videos",
+					localField: "videos",
+					foreignField: "_id",
+					as: "videos",
+				},
+			},
+			{
+				$unwind: {
+					path: "$videos",
+					preserveNullAndEmptyArrays: true,
+				},
+			},
+			{
+				$lookup: {
+					from: "users",
+					localField: "videos.owner",
+					foreignField: "_id",
+					as: "videos.owner",
+				},
+			},
+			{
+				$unwind: "$videos.owner",
+			},
+			{
+				$lookup: {
+					from: "likes",
+					localField: "videos._id",
+					foreignField: "video",
+					as: "videos.likes",
+				},
+			},
+			{
+				$addFields: {
+					"videos.likeCount": { $size: "$videos.likes" },
+				},
+			},
+			{
+				/* 	
+					Why $filter videos here? Why not $match in the previous stage?
+					Because we may have playlist with no videos, which is a valid case
+					We want to keep those playlists in the result
+					if we use $match, it will remove those playlists
+				*/
+				$set: {
+					videos: {
+						$filter: {
+							input: "$videos",
+							as: "video",
+							cond: {
+								$or: [
+									{ $eq: ["$$video.owner._id", accessingUserId] },
+									{ $eq: ["$$video.isPublished", true] },
+								],
+							},
+						},
+					},
+				},
+			},
+			{
+				$skip: (page - 1) * limit,
+			},
+			{
+				$limit: limit,
+			},
+			{
+				$group: {
+					_id: "$_id",
+					videos: { $push: "$videos" },
+					title: { $first: "$title" },
+					description: { $first: "$description" },
+					owner: { $first: "$owner" },
+					createdAt: { $first: "$createdAt" },
+				},
+			},
+			{
+				$project: {
+					_id: 1,
+					title: 1,
+					description: 1,
+					owner: {
+						_id: 1,
+						fullName: 1,
+						avatar: 1,
+					},
+					videos: {
+						thumbnail: 1,
+						title: 1,
+						duration: 1,
+						views: 1,
+						likeCount: 1,
+						createdAt: 1,
+						owner: {
+							_id: 1,
+							fullName: 1,
+							avatar: 1,
+						},
+					},
+					createdAt: 1,
+				},
+			},
+		])
+
+		return new PaginationResponseDTO(playlist[0], totalVideos, totalPages, page)
+	} catch (error) {
+		console.error("Failed to get playlist by ID:", error)
+		if (error instanceof ApiError) {
+			throw error
+		}
+		throw new ApiError(500, "Internal Server Error")
+	}
+}
 
 const searchPlaylistsByTitle = async (
 	searchQuery,
