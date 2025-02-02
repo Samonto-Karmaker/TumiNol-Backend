@@ -4,10 +4,12 @@ import {
 	addVideoToPlaylist,
 	createPlaylist,
 	deletePlaylist,
+	getPlaylistById,
 	getPlaylistsByOwnerId,
 	removeVideoFromPlaylist,
 	searchPlaylistsByTitle,
 	togglePlaylistPrivacy,
+	updatePlaylistDetails,
 } from "../services/playlist.service.js"
 import { STANDARD_LIMIT_PER_PAGE } from "../constants.js"
 
