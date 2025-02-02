@@ -91,6 +91,17 @@ const getPlaylistByIdController = asyncHandler(async (req, res) => {
 	res.status(200).json(new ApiResponse(200, "Playlist fetched", playlist))
 })
 
+const updatePlaylistDetailsController = asyncHandler(async (req, res) => {
+	const { playlistId } = req.params
+	const { title, description } = req.body
+	const userId = req.user._id
+	const playlist = await updatePlaylistDetails(playlistId, userId, {
+		title,
+		description,
+	})
+	res.status(200).json(new ApiResponse(200, "Playlist updated", playlist))
+})
+
 export {
 	createPlaylistController,
 	getPlaylistsByOwnerIdController,
@@ -100,4 +111,5 @@ export {
 	deletePlaylistController,
 	searchPlaylistsByTitleController,
 	getPlaylistByIdController,
+	updatePlaylistDetailsController,
 }
