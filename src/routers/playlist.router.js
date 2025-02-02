@@ -8,6 +8,7 @@ import {
 	addVideoToPlaylistController,
 	createPlaylistController,
 	deletePlaylistController,
+	getPlaylistByIdController,
 	getPlaylistsByOwnerIdController,
 	removeVideoFromPlaylistController,
 	searchPlaylistsByTitleController,
@@ -34,8 +35,11 @@ playlistRouter
 
 playlistRouter.patch("/privacy/:playlistId", togglePlaylistPrivacyController)
 
-playlistRouter.route("/:playlistId").delete(deletePlaylistController)
-
 playlistRouter.get("/search", searchPlaylistsByTitleController)
+
+playlistRouter
+	.route("/:playlistId")
+	.delete(deletePlaylistController)
+	.get(getPlaylistByIdController)
 
 export default playlistRouter
