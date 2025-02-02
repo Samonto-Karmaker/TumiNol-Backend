@@ -81,6 +81,16 @@ const searchPlaylistsByTitleController = asyncHandler(async (req, res) => {
 	res.status(200).json(new ApiResponse(200, "Playlists fetched", playlists))
 })
 
+const getPlaylistByIdController = asyncHandler(async (req, res) => {
+	const { playlistId } = req.params
+	const userId = req.user._id
+	let { page, limit } = req.query
+	page = parseInt(page) || 1
+	limit = parseInt(limit) || STANDARD_LIMIT_PER_PAGE
+	const playlist = await getPlaylistById(playlistId, userId, page, limit)
+	res.status(200).json(new ApiResponse(200, "Playlist fetched", playlist))
+})
+
 export {
 	createPlaylistController,
 	getPlaylistsByOwnerIdController,
@@ -89,4 +99,5 @@ export {
 	togglePlaylistPrivacyController,
 	deletePlaylistController,
 	searchPlaylistsByTitleController,
+	getPlaylistByIdController,
 }
