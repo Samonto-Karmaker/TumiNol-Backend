@@ -166,7 +166,6 @@ const getPlaylistsByOwnerId = async (
 	}
 }
 
-// TODO: Issue in the case of playlist having only 1 video with no video access
 const getPlaylistById = async (
 	playlistId,
 	accessingUserId,
@@ -183,166 +182,48 @@ const getPlaylistById = async (
 		throw new ApiError(400, "Invalid page or limit")
 	}
 	try {
-		const constraints = {
-			_id: new mongoose.Types.ObjectId(playlistId),
-		}
-		let playlist =
-			await Playlist.findById(playlistId).select("_id owner videos")
+		let playlist = await Playlist.findById(playlistId).populate(
+			"owner",
+			"_id fullName avatar"
+		)
 		if (!playlist) {
 			throw new ApiError(404, "Playlist not found")
 		}
-		if (playlist.owner.toString() !== accessingUserId.toString()) {
-			constraints.isPublic = true
+		if (
+			playlist.owner._id.toString() !== accessingUserId.toString() &&
+			!playlist.isPublic
+		) {
+			throw new ApiError(403, "Forbidden")
 		}
 
-		const totalVideos = playlist.videos.length
-		const totalPages = totalVideos > 0 ? Math.ceil(totalVideos / limit) : 1
+		const totalVideos = await Video.countDocuments({
+			_id: { $in: playlist.videos },
+			$or: [{ isPublished: true }, { owner: accessingUserId }],
+		})
+
+		// A playlist can have 0 videos
+		const totalPages = Math.ceil(totalVideos / limit) || 1
 		if (page > totalPages) {
 			throw new ApiError(400, "Invalid page value")
 		}
 
-		const initialPlaylist = [
-			{
-				$match: constraints,
-			},
-			{
-				$lookup: {
-					from: "users",
-					localField: "owner",
-					foreignField: "_id",
-					as: "owner",
-				},
-			},
-			{
-				$unwind: "$owner",
-			},
-			{
-				$unwind: {
-					path: "$videos",
-					preserveNullAndEmptyArrays: true,
-				},
-			},
-			{
-				$lookup: {
-					from: "videos",
-					localField: "videos",
-					foreignField: "_id",
-					as: "videos",
-				},
-			},
-			{
-				/*
-					Why $filter videos here? Why not $match in the previous stage?
-					Because we may have playlist with no videos, which is a valid case
-					We want to keep those playlists in the result
-					if we use $match, it will remove those playlists
-				*/
-				$set: {
-					videos: {
-						$filter: {
-							input: "$videos",
-							as: "video",
-							cond: {
-								$or: [
-									{ $eq: ["$$video.owner", accessingUserId] },
-									{ $eq: ["$$video.isPublished", true] },
-								],
-							},
-						},
-					},
-				},
-			},
-		]
+		/*
+			Using aggregation pipeline was making it very complex
+			Also there were some corner cases where the pipeline was not working as expected
+			So, I used the old-school way of slicing the videoIds array and querying the videos
+			It's not the most efficient way but it works for now
+		*/
+		const videoIds = playlist.videos.slice((page - 1) * limit, page * limit)
+		const videos = await Video.find({
+			_id: { $in: videoIds },
+			$or: [{ isPublished: true }, { owner: accessingUserId }],
+		})
+			.select("-videoFile -description -views -createdAt -updatedAt")
+			.populate("owner", "_id fullName avatar")
 
-		const videoProcessing = [
-			{
-				$unwind: {
-					path: "$videos",
-					preserveNullAndEmptyArrays: true,
-				},
-			},
-			{
-				$lookup: {
-					from: "users",
-					localField: "videos.owner",
-					foreignField: "_id",
-					as: "videos.owner",
-				},
-			},
-			{
-				$unwind: "$videos.owner",
-			},
-			{
-				$lookup: {
-					from: "likes",
-					localField: "videos._id",
-					foreignField: "video",
-					as: "videos.likes",
-				},
-			},
-			{
-				$addFields: {
-					"videos.likeCount": { $size: "$videos.likes" },
-				},
-			},
-			{
-				$skip: (page - 1) * limit,
-			},
-			{
-				$limit: limit,
-			},
-			{
-				$group: {
-					_id: "$_id",
-					videos: { $push: "$videos" },
-					title: { $first: "$title" },
-					description: { $first: "$description" },
-					owner: { $first: "$owner" },
-					createdAt: { $first: "$createdAt" },
-				},
-			},
-		]
-
-		const projection = [
-			{
-				$project: {
-					_id: 1,
-					title: 1,
-					description: 1,
-					owner: {
-						_id: 1,
-						fullName: 1,
-						avatar: 1,
-					},
-					videos: {
-						thumbnail: 1,
-						title: 1,
-						duration: 1,
-						views: 1,
-						likeCount: 1,
-						createdAt: 1,
-						owner: {
-							_id: 1,
-							fullName: 1,
-							avatar: 1,
-						},
-					},
-					createdAt: 1,
-				},
-			},
-		]
-
-		if (totalVideos > 0) {
-			playlist = await Playlist.aggregate([
-				...initialPlaylist,
-				...videoProcessing,
-				...projection,
-			])
-		} else {
-			playlist = await Playlist.aggregate([...initialPlaylist, ...projection])
-		}
-
-		return new PaginationResponseDTO(playlist[0], totalVideos, totalPages, page)
+		playlist = playlist.toObject()
+		playlist.videos = videos
+		return new PaginationResponseDTO(playlist, totalVideos, totalPages, page)
 	} catch (error) {
 		console.error("Failed to get playlist by ID:", error)
 		if (error instanceof ApiError) {
