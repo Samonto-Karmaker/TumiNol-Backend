@@ -1,4 +1,4 @@
-import mongoose, { get, mongo } from "mongoose"
+import mongoose from "mongoose"
 import { Video } from "../models/Video.js"
 import ApiError from "../utils/ApiError.js"
 import {
