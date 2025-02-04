@@ -97,7 +97,7 @@ const updatePlaylistDetailsController = asyncHandler(async (req, res) => {
 	const { playlistId } = req.params
 	const { title, description } = req.body
 	const userId = req.user._id
-	const playlist = await updatePlaylistDetails(playlistId, userId, {
+	const playlist = await updatePlaylistDetails(userId, playlistId, {
 		title,
 		description,
 	})
