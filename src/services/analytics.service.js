@@ -22,7 +22,11 @@ const getVideoStats = async userId => {
 		}
 
 		videoStats.views = videos.reduce((acc, video) => acc + video.views, 0)
-		videoStats.content = videos.reduce((acc, video) => acc + video.duration, 0)
+
+		// Calculate total content duration in seconds rounded to the nearest second
+		videoStats.content = Math.round(
+			videos.reduce((acc, video) => acc + video.duration, 0)
+		)
 		videoStats.totalPublicVideos = videos.filter(
 			video => video.isPublished
 		).length
@@ -135,28 +139,28 @@ const getTotalSubscribers = async userId => {
 			{
 				$match: {
 					_id: userId,
-				}
-			}, 
+				},
+			},
 			{
 				$lookup: {
 					from: "subscriptions",
 					localField: "_id",
 					foreignField: "channel",
 					as: "subscribers",
-				}
+				},
 			},
 			// As there is only one user, we can use $addFields instead of $unwind
 			{
 				$addFields: {
-					totalSubscribers: { $size: "$subscribers" }
-				}
+					totalSubscribers: { $size: "$subscribers" },
+				},
 			},
 			{
 				$project: {
 					_id: 0,
-					totalSubscribers: 1
-				}
-			}
+					totalSubscribers: 1,
+				},
+			},
 		])
 
 		if (!result || result.length === 0) {
@@ -175,7 +179,10 @@ const getTotalSubscribers = async userId => {
 
 const getPublicPlaylist = async userId => {
 	try {
-		const result = await Playlist.find({ owner: userId, isPublic: true }).countDocuments()
+		const result = await Playlist.find({
+			owner: userId,
+			isPublic: true,
+		}).countDocuments()
 		return result
 	} catch (error) {
 		console.error("Error in getPublicPlaylist:", error)
@@ -187,7 +194,7 @@ const getPublicPlaylist = async userId => {
 }
 
 // service functions
-// Get total views, likes, comments, subscribers, content (in hours),
+// Get total views, likes, comments, subscribers, content (in seconds for now),
 // public videos, and playlist for a channel
 const getChannelStats = async userId => {
 	if (!userId || !isValidObjectId(userId)) {
@@ -219,7 +226,7 @@ const getChannelStats = async userId => {
 			getTotalLikes(user._id),
 			getTotalComments(user._id),
 			getTotalSubscribers(user._id),
-			getPublicPlaylist(user._id)
+			getPublicPlaylist(user._id),
 		])
 
 		results.forEach((result, index) => {
