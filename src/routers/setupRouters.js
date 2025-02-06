@@ -7,6 +7,7 @@ import videoRouter from "./video.router.js"
 import likeRouter from "./like.router.js"
 import commentRouter from "./comment.router.js"
 import playlistRouter from "./playlist.router.js"
+import analyticsRouter from "./analytics.router.js"
 
 const setupRouters = app => {
 	app.use(`${API_URL}/test`, testRouter)
@@ -17,6 +18,7 @@ const setupRouters = app => {
 	app.use(`${API_URL}/likes`, likeRouter)
 	app.use(`${API_URL}/comments`, commentRouter)
 	app.use(`${API_URL}/playlists`, playlistRouter)
+	app.use(`${API_URL}/analytics`, analyticsRouter)
 }
 
 export default setupRouters
