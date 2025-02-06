@@ -14,7 +14,7 @@ const getChannelStatsController = asyncHandler(async (req, res) => {
 })
 
 const getTopPerformingVideosController = asyncHandler(async (req, res) => {
-	const userId = req.params.userId
+	const userId = req.user._id
 	const topVideos = await getTopPerformingVideos(userId)
 	res
 		.status(200)
