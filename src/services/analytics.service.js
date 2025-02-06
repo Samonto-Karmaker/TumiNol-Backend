@@ -1,6 +1,5 @@
 import ApiError from "../utils/ApiError.js"
 import { Video } from "../models/Video.js"
-import { Like } from "../models/Like.js"
 
 // helper functions
 const getVideoStats = async userId => {
@@ -38,8 +37,8 @@ const getVideoStats = async userId => {
 const getTotalLikes = async userId => {
 	try {
 		const result = await Video.aggregate([
-			{ 
-				$match: { owner: userId } 
+			{
+				$match: { owner: userId },
 			},
 			{
 				$lookup: {
@@ -56,7 +55,7 @@ const getTotalLikes = async userId => {
 				$group: {
 					_id: null, // group by all documents into one
 					totalLikes: { $sum: 1 }, // Essentially count the number of documents
-				}
+				},
 			},
 			{
 				$project: {
@@ -69,7 +68,7 @@ const getTotalLikes = async userId => {
 		if (!result || result.length === 0) {
 			return 0
 		}
-		
+
 		return result[0].totalLikes
 	} catch (error) {
 		console.error("Error in getTotalLikes:", error)
@@ -80,7 +79,52 @@ const getTotalLikes = async userId => {
 	}
 }
 
-const getTotalComments = async userId => {}
+const getTotalComments = async userId => {
+	try {
+		const result = await Video.aggregate([
+			{
+				$match: {
+					owner: userId,
+				},
+			},
+			{
+				$lookup: {
+					from: "comments",
+					localField: "_id",
+					foreignField: "video",
+					as: "comments",
+				},
+			},
+			{
+				$unwind: "$comments",
+			},
+			{
+				$group: {
+					_id: null,
+					totalComments: { $sum: 1 },
+				},
+			},
+			{
+				$project: {
+					_id: 0,
+					totalComments: 1,
+				},
+			},
+		])
+
+		if (!result || result.length === 0) {
+			return 0
+		}
+
+		return result[0].totalComments
+	} catch (error) {
+		console.error("Error in getTotalComments:", error)
+		if (error instanceof ApiError) {
+			throw error
+		}
+		throw new ApiError(500, "Internal Server Error")
+	}
+}
 
 const getTotalSubscribers = async userId => {}
 
