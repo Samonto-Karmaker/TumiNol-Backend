@@ -1,6 +1,7 @@
 import ApiError from "../utils/ApiError.js"
 import { Video } from "../models/Video.js"
 import { User } from "../models/User.js"
+import { Playlist } from "../models/Playlist.js"
 
 // helper functions
 const getVideoStats = async userId => {
@@ -171,7 +172,18 @@ const getTotalSubscribers = async userId => {
 	}
 }
 
-const getPublicPlaylist = async userId => {}
+const getPublicPlaylist = async userId => {
+	try {
+		const result = await Playlist.find({ owner: userId, isPublic: true }).countDocuments()
+		return result
+	} catch (error) {
+		console.error("Error in getPublicPlaylist:", error)
+		if (error instanceof ApiError) {
+			throw error
+		}
+		throw new ApiError(500, "Internal Server Error")
+	}
+}
 
 // service functions
 // Get total views, likes, comments, subscribers, content (in hours),
