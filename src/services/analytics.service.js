@@ -334,4 +334,4 @@ const getTopPerformingVideos = async userId => {
 	}
 }
 
-export { getChannelStats }
+export { getChannelStats, getTopPerformingVideos }
