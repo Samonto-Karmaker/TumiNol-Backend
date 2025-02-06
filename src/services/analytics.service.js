@@ -2,6 +2,7 @@ import ApiError from "../utils/ApiError.js"
 import { Video } from "../models/Video.js"
 import { User } from "../models/User.js"
 import { Playlist } from "../models/Playlist.js"
+import { isValidObjectId } from "../utils/validateObjectId.js"
 
 // helper functions
 const getVideoStats = async userId => {
@@ -189,10 +190,15 @@ const getPublicPlaylist = async userId => {
 // Get total views, likes, comments, subscribers, content (in hours),
 // public videos, and playlist for a channel
 const getChannelStats = async userId => {
-	if (!userId) {
-		throw new ApiError(400, "User ID is required")
+	if (!userId || !isValidObjectId(userId)) {
+		throw new ApiError(400, "A valid userId is required")
 	}
 	try {
+		const user = await User.findById(userId).select("_id")
+		if (!user) {
+			throw new ApiError(404, "User not found")
+		}
+
 		// Initialize channelStats object
 		const channelStats = {
 			views: undefined,
@@ -204,7 +210,40 @@ const getChannelStats = async userId => {
 			publicPlaylist: undefined,
 		}
 
-		// TODO: Implement the logic to get channel stats
+		const videoStats = await getVideoStats(user._id)
+		channelStats.views = videoStats.views
+		channelStats.content = videoStats.content
+		channelStats.publicVideos = videoStats.totalPublicVideos
+
+		const results = await Promise.allSettled([
+			getTotalLikes(user._id),
+			getTotalComments(user._id),
+			getTotalSubscribers(user._id),
+			getPublicPlaylist(user._id)
+		])
+
+		results.forEach((result, index) => {
+			if (result.status === "fulfilled") {
+				switch (index) {
+					case 0:
+						channelStats.likes = result.value
+						break
+					case 1:
+						channelStats.comments = result.value
+						break
+					case 2:
+						channelStats.subscribers = result.value
+						break
+					case 3:
+						channelStats.publicPlaylist = result.value
+						break
+					default:
+						break
+				}
+			} else {
+				console.error("Error in getChannelStats:", result.reason)
+			}
+		})
 
 		return channelStats
 	} catch (error) {
