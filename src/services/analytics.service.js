@@ -1,5 +1,6 @@
 import ApiError from "../utils/ApiError.js"
 import { Video } from "../models/Video.js"
+import { User } from "../models/User.js"
 
 // helper functions
 const getVideoStats = async userId => {
@@ -126,7 +127,49 @@ const getTotalComments = async userId => {
 	}
 }
 
-const getTotalSubscribers = async userId => {}
+const getTotalSubscribers = async userId => {
+	try {
+		const result = await User.aggregate([
+			{
+				$match: {
+					_id: userId,
+				}
+			}, 
+			{
+				$lookup: {
+					from: "subscriptions",
+					localField: "_id",
+					foreignField: "channel",
+					as: "subscribers",
+				}
+			},
+			// As there is only one user, we can use $addFields instead of $unwind
+			{
+				$addFields: {
+					totalSubscribers: { $size: "$subscribers" }
+				}
+			},
+			{
+				$project: {
+					_id: 0,
+					totalSubscribers: 1
+				}
+			}
+		])
+
+		if (!result || result.length === 0) {
+			return 0
+		}
+
+		return result[0].totalSubscribers
+	} catch (error) {
+		console.error("Error in getTotalSubscribers:", error)
+		if (error instanceof ApiError) {
+			throw error
+		}
+		throw new ApiError(500, "Internal Server Error")
+	}
+}
 
 const getPublicPlaylist = async userId => {}
 
