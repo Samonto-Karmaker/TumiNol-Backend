@@ -262,4 +262,76 @@ const getChannelStats = async userId => {
 	}
 }
 
+// here userId comes from req.user.id not from req.params.userId
+// Only visible to the channel owner
+const getTopPerformingVideos = async userId => {
+	if (!userId) {
+		throw new ApiError(400, "A valid userId is required")
+	}
+	try {
+		const user = await User.findById(userId).select("_id")
+		if (!user) {
+			throw new ApiError(404, "User not found")
+		}
+
+		const videos = await Video.aggregate([
+			{
+				$match: {
+					owner: user._id,
+				},
+			},
+			{
+				$lookup: {
+					from: "likes",
+					localField: "_id",
+					foreignField: "video",
+					as: "likes",
+				},
+			},
+			{
+				$lookup: {
+					from: "comments",
+					localField: "_id",
+					foreignField: "video",
+					as: "comments",
+				},
+			},
+			{
+				$addFields: {
+					likesCount: { $size: "$likes" },
+					commentsCount: { $size: "$comments" },
+				},
+			},
+			{
+				$sort: {
+					views: -1,
+					likesCount: -1,
+					commentsCount: -1,
+				},
+			},
+			{
+				$project: {
+					_id: 1,
+					title: 1,
+					thumbnail: 1,
+					views: 1,
+					likesCount: 1,
+					commentsCount: 1,
+				},
+			},
+			{
+				$limit: 5,
+			},
+		])
+
+		return videos
+	} catch (error) {
+		console.error("Error in topPerformingVideos:", error)
+		if (error instanceof ApiError) {
+			throw error
+		}
+		throw new ApiError(500, "Internal Server Error")
+	}
+}
+
 export { getChannelStats }
