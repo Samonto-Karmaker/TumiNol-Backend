@@ -1,6 +1,7 @@
 import ApiError from "../utils/ApiError.js"
 import { Video } from "../models/Video.js"
 import { User } from "../models/User.js"
+import { Post } from "../models/Post.js"
 import { Playlist } from "../models/Playlist.js"
 import { isValidObjectId } from "../utils/validateObjectId.js"
 
@@ -334,4 +335,60 @@ const getTopPerformingVideos = async userId => {
 	}
 }
 
-export { getChannelStats, getTopPerformingVideos }
+const getTopPosts = async userId => {
+	if (!userId) {
+		throw new ApiError(400, "A valid userId is required")
+	}
+	try {
+		const user = await User.findById(userId).select("_id")
+		if (!user) {
+			throw new ApiError(404, "User not found")
+		}
+
+		const posts = await Post.aggregate([
+			{
+				$match: {
+					owner: user._id,
+				},
+			},
+			{
+				$lookup: {
+					from: "likes",
+					localField: "_id",
+					foreignField: "post",
+					as: "likes",
+				},
+			},
+			{
+				$addFields: {
+					likesCount: { $size: "$likes" },
+				},
+			},
+			{
+				$sort: {
+					likesCount: -1,
+				},
+			},
+			{
+				$project: {
+					_id: 1,
+					content: 1,
+					likesCount: 1,
+				},
+			},
+			{
+				$limit: 5,
+			},
+		])
+
+		return posts
+	} catch (error) {
+		console.error("Error in getTopPosts:", error)
+		if (error instanceof ApiError) {
+			throw error
+		}
+		throw new ApiError(500, "Internal Server Error")
+	}
+}
+
+export { getChannelStats, getTopPerformingVideos, getTopPosts }
