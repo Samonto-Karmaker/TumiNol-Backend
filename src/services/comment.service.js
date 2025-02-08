@@ -40,7 +40,7 @@ const getVideoComments = async (
 
 		const comments = await Comment.aggregate([
 			{
-				$match: { video: new mongoose.Types.ObjectId(videoId) },
+				$match: { video: video._id },
 			},
 			{
 				$lookup: {
@@ -65,14 +65,14 @@ const getVideoComments = async (
 				$addFields: {
 					likeCount: { $size: "$likes" },
 					isLiked: {
-						$in: [accessingUserId, "$likes.owner"],
+						$in: [accessingUserId, "$likes.likedBy"],
 					},
 					isEdited: {
 						$cond: {
 							if: { $ne: ["$createdAt", "$updatedAt"] },
 							then: true,
 							else: false,
-						}
+						},
 					},
 				},
 			},
@@ -92,7 +92,8 @@ const getVideoComments = async (
 			},
 			{
 				$sort: {
-					["createdAt"]: -1,
+					likeCount: -1,
+					createdAt: -1,
 				},
 			},
 			{
@@ -102,8 +103,6 @@ const getVideoComments = async (
 				$limit: limit,
 			},
 		])
-
-		console.log(comments)
 
 		return new PaginationResponseDTO(comments, totalComments, totalPages, page)
 	} catch (error) {
