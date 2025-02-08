@@ -10,6 +10,12 @@ const API_URL = "/api/v1"
 const HIGHEST_LIMIT_PER_PAGE = 50
 const STANDARD_LIMIT_PER_PAGE = 10
 
+const RATE_LIMIT_WINDOW = 5 * 60 * 1000 // 5 minutes
+const RATE_LIMIT = 10
+const SLOWDOWN_LIMIT = 5
+const SLOWDOWN_INTERVAL = 60 * 1000 // 1 minute
+const SLOWDOWN_DELAY = 1000 // 1 second
+
 const VideoSortOptionsEnums = Object.freeze({
 	CREATED_AT: "createdAt",
 	VIEWS: "views",
@@ -30,4 +36,9 @@ export {
 	TEMP_DIR,
 	VideoSortOptionsEnums,
 	VideoSortOrdersEnums,
+	RATE_LIMIT_WINDOW,
+	RATE_LIMIT,
+	SLOWDOWN_LIMIT,
+	SLOWDOWN_INTERVAL,
+	SLOWDOWN_DELAY,
 }
