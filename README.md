@@ -11,6 +11,7 @@ TumiNol-Backend is a prototype project of the backend of the famous video-sharin
 - [Environment Variables](#environment-variables)
 
 ## Features
+
 - User registration, authentication and authorization
 - Change password
 - Upload and update avatar and cover image
@@ -31,6 +32,14 @@ TumiNol-Backend is a prototype project of the backend of the famous video-sharin
 - Get individual and owner playlist with pagination
 - Add and remove video from and to playlist
 - Search, update, delete, and manage playlists
+- Get channel stats such as total views, total likes, total comments, etc.
+- Get top 5 performing video
+- Get top 5 most liked post 
+- Rate limiting and request slow down
+- Centralized error handling
+- Standardized API response
+- Use of Content Distribution Network
+- Custom request validations
 
 ## Installation
 
@@ -146,6 +155,12 @@ Here are some of the main API endpoints:
     GET /api/v1/playlists/:playlistId - Get playlist by ID with pagination for videos
     PATCH /api/v1/playlists/:playlistId - Update playlist details
     DELETE /api/v1/playlists/:playlistId - Delete a playlist
+    ```
+- Analytics Routes:
+    ```http
+    GET /api/v1/analytics/channel-stats/:userId - Get channel stats
+    GET /api/v1/analytics/top-videos - Get top performing videos
+    GET /api/v1/analytics/top-posts - Get top posts
     ```
 
 - Test Routes:
