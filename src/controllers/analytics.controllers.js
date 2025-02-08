@@ -3,6 +3,7 @@ import ApiResponse from "../utils/ApiResponse.js"
 import {
 	getChannelStats,
 	getTopPerformingVideos,
+	getTopPosts,
 } from "../services/analytics.service.js"
 
 const getChannelStatsController = asyncHandler(async (req, res) => {
@@ -21,4 +22,14 @@ const getTopPerformingVideosController = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "Top performing videos fetched", topVideos))
 })
 
-export { getChannelStatsController, getTopPerformingVideosController }
+const getTopPostsController = asyncHandler(async (req, res) => {
+	const userId = req.user._id
+	const topPosts = await getTopPosts(userId)
+	res.status(200).json(new ApiResponse(200, "Top posts fetched", topPosts))
+})
+
+export {
+	getChannelStatsController,
+	getTopPerformingVideosController,
+	getTopPostsController,
+}
